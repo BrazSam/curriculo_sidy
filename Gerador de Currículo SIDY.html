@@ -924,12 +924,6 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         </button>
       </div>
 
-      <div style="margin-top: 18px;">
-        <button type="button" class="btn-edit-sec" onclick="loadExampleData()" style="padding: 6px 14px; font-size: 0.85rem;">
-          ⚙ Preencher com dados de exemplo (teste rápido)
-        </button>
-      </div>
-    </div>
   </main>
 
   <!-- ========================================== -->
@@ -1055,8 +1049,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           </div>
 
           <div class="form-group">
-            <label for="f-email">E-mail (Opcional)</label>
-            <input type="email" id="f-email" class="form-control" placeholder="carlos@exemplo.com">
+            <label for="f-email">E-mail</label>
+            <input type="email" id="f-email" class="form-control" placeholder="carlos@exemplo.com" required>
           </div>
 
           <div class="form-group">
@@ -1108,7 +1102,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       <section class="form-card" id="sec-maquinas">
         <div class="form-card-header">
           <h3 class="form-card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17h11v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1z"/><path d="M15 17 12 9H8l-3 8"/><path d="M12 9h4l3 4h-4"/><circle cx="6" cy="19" r="1.2"/><circle cx="16" cy="19" r="1.2"/></svg>
             Máquinas Capacitadas
           </h3>
           <button type="button" class="btn-edit-sec" onclick="toggleAllMachines()">Selecionar todas</button>
@@ -1506,14 +1500,10 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
                 <h1 class="resume-candidate-name" id="res-name">NOME DO CANDIDATO</h1>
                 <div class="resume-candidate-role">
                   <span>Operador de Máquinas Pesadas</span>
-                  <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; color: #ffffff;">Certificado 66h</span>
+                  
                 </div>
               </div>
-              <!-- Small SIDY Stamp in Header -->
-              <div style="background: rgba(255,255,255,0.12); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); text-align: right;">
-                <div style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85;">Escola Formadora</div>
-                <div style="font-weight: 800; font-size: 0.9rem; color: var(--sidy-yellow); font-family: 'Poppins', sans-serif;">SIDY PROFISSÕES</div>
-              </div>
+              
             </div>
 
             <div class="resume-contacts-row" id="res-contacts-row">
@@ -1580,11 +1570,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
         <!-- Footer stamp -->
         <div class="resume-footer">
-          <div>
-            <strong>SIDY Escola de Profissões</strong> · Formando operadores qualificados para o mercado.
-          </div>
           <div id="res-gen-date">
-            Currículo gerado via Gerador SIDY
           </div>
         </div>
 
@@ -1824,34 +1810,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       });
     }
 
-    // Example Mock Data Loader
-    function loadExampleData() {
-      document.getElementById('f-nome').value = 'Marcos Vinicius de Souza';
-      document.getElementById('f-nasc').value = '1992-06-15';
-      document.getElementById('f-cidade').value = 'Campinas';
-      document.getElementById('f-uf').value = 'SP';
-      document.getElementById('f-bairro').value = 'Jardim das Oliveiras';
-      document.getElementById('f-telefone').value = '(19) 99824-7120';
-      document.getElementById('f-email').value = 'marcos.operador@gmail.com';
-      document.getElementById('f-cnh').value = 'D';
-
-      document.getElementById('f-curso-inicio').value = '2024-01';
-      document.getElementById('f-curso-fim').value = '2024-05';
-
-      // Exp 1
-      const exp1 = document.getElementById('exp-block-0');
-      exp1.querySelector('.exp-empresa').value = 'Terra & Obra Engenharia Viária';
-      exp1.querySelector('.exp-cargo').value = 'Operador de Retroescavadeira';
-      exp1.querySelector('.exp-inicio').value = '2022-03';
-      exp1.querySelector('.exp-fim').value = '2023-11';
-      exp1.querySelector('.exp-atividades').value = 'Operação de retroescavadeira em abertura de valas para drenagem, corte e aterro, nivelamento e carregamento de terra em caminhões basculantes com rigoroso cumprimento das normas de segurança.';
-
-      document.getElementById('f-outras-info').value = 'Dedicação a checklists diários de manutenção, conhecimento prático em leitura de níveis a laser e disponibilidade irrestrita para alojamento ou viagens em obras regionais.';
-
-      updateInitials();
-      goToStep(2);
-    }
-
+   
     // Form Gathering & Validation
     function validateAndGoToReview() {
       const nomeEl = document.getElementById('f-nome');
@@ -2158,7 +2117,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
       // Timestamp footer
       const dNow = new Date();
-      document.getElementById('res-gen-date').textContent = `Documento emitido em ${dNow.toLocaleDateString('pt-BR')} · SIDY Escola de Profissões`;
+      document.getElementById('res-gen-date');
 
       goToStep(4);
     }
