@@ -805,6 +805,26 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         margin: 0;
       }
     }
+
+      /* Chips de máquinas no certificado */
+      .res-mach-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+    .res-mach-icon {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
   </style>
 </head>
 <body>
@@ -1627,6 +1647,13 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       outrasInfo: ''
     };
 
+      const MACHINE_ICONS = {
+        'Escavadeira Hidráulica': 'img/escavadeira.png',
+        'Retroescavadeira': 'img/retro escavadeira.png',
+        'Pá Carregadeira': 'img/pá carregadeira.png',
+        'Mini Pá Carregadeira (Bobcat)': 'img/mini pá.png'
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('foot-year').textContent = new Date().getFullYear();
       // Pre-fill initial dates for course
@@ -1959,7 +1986,10 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       // Maquinas
       const maqContainer = document.getElementById('rev-maquinas-chips');
       if (state.maquinas.length > 0) {
-        maqContainer.innerHTML = state.maquinas.map(m => `<span class="tag-chip">🚜 ${m}</span>`).join('');
+        maqContainer.innerHTML = state.maquinas.map(m => {
+        const icon = MACHINE_ICONS[m] || '';
+        return `<span class="res-mach-chip"><img src="${icon}" alt="" class="res-mach-icon"> ${m}</span>`;
+      }).join('');
       } else {
         maqContainer.innerHTML = '<span style="color:#64748b; font-size:0.85rem;">Nenhuma máquina selecionada.</span>';
       }
@@ -2056,7 +2086,10 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       // Machines
       const mList = document.getElementById('res-machines-list');
       if (state.maquinas.length > 0) {
-        mList.innerHTML = state.maquinas.map(m => `<span class="resume-pill highlight">🚜 ${m}</span>`).join('');
+        mList.innerHTML = state.maquinas.map(m => {
+        const icon = MACHINE_ICONS[m] || '';
+        return `<span class="res-mach-chip"><img src="${icon}" alt="" class="res-mach-icon"> ${m}</span>`;
+      }).join('');
       } else {
         mList.innerHTML = '<span class="resume-pill">Operador de Máquinas Pesadas em Geral</span>';
       }
