@@ -1756,12 +1756,13 @@ body {
 
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('foot-year').textContent = new Date().getFullYear();
-      // Pre-fill initial dates for course
+      // Pré-preenchimento novo (diferença de 1 mês)
       const now = new Date();
-      const yr = now.getFullYear();
-      const m = String(now.getMonth() + 1).padStart(2, '0');
-      document.getElementById('f-curso-inicio').value = `${yr - 1}-${m}`;
-      document.getElementById('f-curso-fim').value = `${yr}-${m}`;
+      const ini = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const fim = new Date(now.getFullYear(), now.getMonth(), 1);
+      const fmt = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      document.getElementById('f-curso-inicio').value = fmt(ini); // mês passado
+      document.getElementById('f-curso-fim').value   = fmt(fim);  // mês atual
     });
 
     // Navigation Step Controller
@@ -2130,17 +2131,24 @@ body {
 
       // Adicionais
       const adContainer = document.getElementById('rev-adicionais-container');
-      let adHtml = '';
+      let adHtm = '';
+      const chips = [];
+
       if (state.adicionais.length > 0) {
-        adHtml += `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">${state.adicionais.map(a => `<span class="tag-chip">✓ ${a}</span>`).join('')}</div>`;
+        state.adicionais.forEach(function (a) {
+          chips.push('<span class="tag-chip">✓ ' + a + '</span>');
+        });
       }
       if (state.outrasInfo) {
-        adHtml += `<div style="font-size:0.85rem; color:#334155; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid #e2e8f0;">${state.outrasInfo}</div>`;
+        chips.push('<span class="tag-chip" style="max-width:100%;">✓ ' + state.outrasInfo + '</span>');
       }
-      if (!state.adicionais.length && !state.outrasInfo) {
-        adHtml = '<span style="color:#64748b; font-size:0.85rem;">Nenhuma informação complementar informada.</span>';
+
+      if (chips.length > 0) {
+        adHtm = '<div style="display:flex; flex-wrap:wrap; gap:6px;">' + chips.join('') + '</div>';
+      } else {
+        adHtm = '<span style="color:#64748b; font-size:0.85rem;">Nenhuma informação complementar informada.</span>';
       }
-      adContainer.innerHTML = adHtml;
+      adContainer.innerHTML = adHtm;
     }
 
     // Build Final Resume on A4 Paper
@@ -2248,9 +2256,8 @@ body {
           adChips.style.display = 'none';
         }
         if (state.outrasInfo) {
-          exNotes.style.display = 'block';
-          exNotes.textContent = state.outrasInfo;
-        } else {
+          adChips.innerHTML += '<span class="resume-pill">✓ ' + state.outrasInfo + '</span>';
+          adChips.style.display = 'flex';
           exNotes.style.display = 'none';
         }
       } else {
