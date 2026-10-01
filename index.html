@@ -851,7 +851,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         Crie seu currículo profissional
       </h1>
       <p style="font-size: 1.05rem; color: #475569; margin-bottom: 24px; line-height: 1.5;">
-        Preencha seus dados em poucos passos para gerar o currículo padrão da SIDY Escola de Profissões, pronto para baixar em PDF, imprimir ou enviar diretamente no WhatsApp dos contratantes.
+        Preencha seus dados gerar o currículo padrão da SIDY Escola de Profissões
       </p>
 
       <!-- SVG Illustration: Retroescavadeira / Excavator -->
@@ -1044,7 +1044,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         <div class="form-grid-3">
           <div class="form-group">
             <label for="f-telefone">Telefone / WhatsApp *</label>
-            <input type="tel" id="f-telefone" class="form-control" placeholder="(11) 98765-4321" required oninput="maskPhone(this); validateField(this);">
+            <input type="tel" id="f-telefone" class="form-control" placeholder="Ex: (11) 98675-4321" required oninput="maskPhone(this); validateField(this);">
             <span class="invalid-feedback">Informe um telefone/WhatsApp válido.</span>
           </div>
 
@@ -1102,7 +1102,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       <section class="form-card" id="sec-maquinas">
         <div class="form-card-header">
           <h3 class="form-card-title">
-           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17h11v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1z"/><path d="M15 17 12 9H8l-3 8"/><path d="M12 9h4l3 4h-4"/><circle cx="6" cy="19" r="1.2"/><circle cx="16" cy="19" r="1.2"/></svg>
+           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h12"/><path d="M3 21h12"/><path d="M15 18 12 10H8L5 18"/><path d="M12 10h4l3 4h-4"/><circle cx="5" cy="21" r="1.3"/><circle cx="16" cy="21" r="1.3"/></svg>
             Máquinas Capacitadas
           </h3>
           <button type="button" class="btn-edit-sec" onclick="toggleAllMachines()">Selecionar todas</button>
@@ -1455,18 +1455,18 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         Baixe o documento em PDF de alta qualidade, imprima ou envie uma mensagem pronta diretamente no WhatsApp para as vagas de trabalho.
       </p>
 
-      <!-- Main Action Buttons -->
+        <!-- Voltar e editar dados (no lugar do Baixar Imagem) -->
+        <button type="button" class="btn-sidy btn-sidy-outline" onclick="goToStep(2)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Voltar e editar dados
+        </button>
+
+        <!-- Main Action Buttons -->
       <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 18px;">
         <!-- PDF / Print button -->
         <button type="button" class="btn-sidy btn-sidy-primary" onclick="printOrSavePDF()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           Salvar em PDF / Imprimir
-        </button>
-
-        <!-- Download PNG via vendored html2canvas -->
-        <button type="button" class="btn-sidy btn-sidy-outline" onclick="downloadAsImage()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          Baixar Imagem (.PNG)
         </button>
 
         <!-- WhatsApp Share -->
@@ -1582,10 +1582,10 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
   <footer class="shell-footer no-print" style="margin-top: auto; border-top: 1px solid var(--sidy-border); background: #ffffff; padding: 16px 20px; font-size: 0.82rem; color: #64748b; text-align: center;">
     <div style="max-width: 900px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
       <div>
-        <strong>SIDY Escola de Profissões</strong> — Curso de Operador de Máquinas Pesadas (66 Horas)
+        <strong>SIDY Escola de Profissões</strong>
       </div>
       <div>
-        © <span id="foot-year">2025</span> Todos os direitos reservados.
+        © <span id="foot-year">2026</span> Todos os direitos reservados.
       </div>
     </div>
   </footer>
@@ -1813,6 +1813,15 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
    
     // Form Gathering & Validation
     function validateAndGoToReview() {
+
+        if (!state.photoDataUrl) {
+          alert('Por favor, adicione uma foto de perfil.');
+          goToStep(2);
+          setTimeout(() => {
+          document.getElementById('sec-foto').scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        return;
+      }
       const nomeEl = document.getElementById('f-nome');
       const cidadeEl = document.getElementById('f-cidade');
       const ufEl = document.getElementById('f-uf');
@@ -2158,23 +2167,57 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       });
     }
 
-    // Action: WhatsApp Share
+    // Action: WhatsApp Share (envia o PDF como arquivo no celular)
     function shareOnWhatsApp() {
-      const machinesText = state.maquinas.join(', ');
-      const message = `*CURRÍCULO DE OPERADOR DE MÁQUINAS PESADAS*\n` +
-        `*Nome:* ${state.nome}\n` +
-        `*Qualificação:* SIDY Escola de Profissões (66 Horas)\n` +
-        `*Equipamentos:* ${machinesText}\n` +
-        (state.cnh && state.cnh !== 'Não possuo' ? `*CNH:* Categoria ${state.cnh}\n` : '') +
-        `*Localização:* ${state.cidade}/${state.uf}\n` +
-        `*Contato:* ${state.telefone}\n` +
-        (state.adicionais.length ? `*Disponibilidades:* ${state.adicionais.join(' | ')}\n` : '') +
-        `\n_Currículo completo certificado gerado pela SIDY Escola de Profissões._`;
+    const machinesText = state.maquinas.join(', ');
+    const msg = `*CURRÍCULO DE OPERADOR DE MÁQUINAS PESADAS*\n` +
+    `*Nome:* ${state.nome}\n` +
+    `*Qualificação:* SIDY Escola de Profissões (66 Horas)\n` +
+    (machinesText ? `*Máquinas:* ${machinesText}\n` : '') +
+    `\n_Currículo completo certificado gerado pela SIDY Escola de Profissões._`;
 
-      const encodedMsg = encodeURIComponent(message);
-      const url = `https://wa.me/?text=${encodedMsg}`;
-      window.open(url, '_blank');
+    const paper = document.getElementById('resume-paper');
+    if (!paper) { window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank'); return; }
+
+    window.html2canvas(paper, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(function (canvas) {
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const JSPDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : null;
+      let blob = null;
+
+    if (JSPDF) {
+      const pdf = new JSPDF({ unit: 'mm', format: 'a4', compress: true });
+      const pageW = 210, pageH = 297;
+      const imgH = (canvas.height * pageW) / canvas.width;
+      let heightLeft = imgH;
+      let position = 0;
+      pdf.addImage(imgData, 'JPEG', 0, position, pageW, imgH);
+      heightLeft -= pageH;
+      while (heightLeft > 0) {
+        position -= pageH;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, pageW, imgH);
+        heightLeft -= pageH;
+      }
+      blob = pdf.output('blob');
     }
+
+    if (blob) {
+      const file = new File([blob], 'Curriculo_SIDY_' + (state.nome.replace(/\s+/g, '_') || 'Aluno') + '.pdf', { type: 'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Meu Currículo SIDY', text: msg }).catch(function (err) {
+          if (err && err.name !== 'AbortError') {
+            window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+          }
+        });
+        return;
+      }
+    }
+
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  }).catch(function () {
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  });
+}
   </script>
 <script>
 /* Skip artifact shell — fixed helpers served beside every artifact. */
