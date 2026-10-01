@@ -117,6 +117,66 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
   @keyframes shell-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 }
 
+/* ============================================
+   RESPONSIVIDADE MOBILE (iOS + Android)
+   Cole este bloco no FINAL da tag <style>
+   ============================================ */
+
+
+
+/* 2. iOS: impede o zoom automático ao focar em campos de formulário.
+      O iOS dá zoom quando a fonte é menor que 16px. */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* 3. Margem de segurança para o "notch" do iPhone e a barra de gestos */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 4. Papel do currículo (210mm) se adapta à tela do celular.
+      IMPORTANTE: o PDF/impressão continuam em 210mm (A4).
+      Este ajuste vale SÓ para a prévia na tela. */
+@media screen and (max-width: 480px) {
+  .resume-wrapper {
+    overflow-x: hidden;
+  }
+  #resume-paper {
+    width: 100%;
+    min-height: auto;
+    transform: scale(0.92);
+    transform-origin: top center;
+  }
+}
+
+/* 5. Stepper: esconde os rótulos de texto em telas muito estreitas,
+      mantendo só os números dos passos (evita quebra/sobreposição) */
+@media screen and (max-width: 400px) {
+  .stepper-nav .step-label {
+    display: none;
+  }
+}
+
+/* 6. Ajusta o rodapé e o fim do formulário para não ficarem
+      atrás da barra de gestos do iPhone / navegação do Android */
+@media screen and (max-width: 480px) {
+  footer,
+  .main-content,
+  .form-footer {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+  }
+}
+
+/* 7. Garante que os chips de máquinas e botões tenham área de toque
+      confortável (mínimo 44px) no celular */
+@media screen and (max-width: 480px) {
+  .custom-check-pill,
+  .btn-sidy {
+    min-height: 44px;
+  }
+}
+
 </style>
   
   <!-- Vendored html2canvas for image export -->
@@ -1094,7 +1154,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         <div class="form-card-header">
           <h3 class="form-card-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-            Formação &amp; Curso SIDY
+            Formação
           </h3>
         </div>
 
@@ -1122,8 +1182,10 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       <section class="form-card" id="sec-maquinas">
         <div class="form-card-header">
           <h3 class="form-card-title">
-           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h12"/><path d="M3 21h12"/><path d="M15 18 12 10H8L5 18"/><path d="M12 10h4l3 4h-4"/><circle cx="5" cy="21" r="1.3"/><circle cx="16" cy="21" r="1.3"/></svg>
-            Máquinas Capacitadas
+            <img src="img/maquinas capacitadas.png" alt="" style="width: 28px; height: 28px; object-fit: contain; vertical-align: middle;">
+              Máquinas Capacitadas
+          </h3>
+           
           </h3>
           <button type="button" class="btn-edit-sec" onclick="toggleAllMachines()">Selecionar todas</button>
         </div>
@@ -1154,7 +1216,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         <div class="form-card-header">
           <h3 class="form-card-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
-            Certificações e NRs
+            Certificações e Normas Regulamentadoras
           </h3>
         </div>
 
@@ -1305,7 +1367,11 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       <section class="form-card" id="sec-adicionais">
         <div class="form-card-header">
           <h3 class="form-card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
             Informações Adicionais
           </h3>
         </div>
@@ -1367,7 +1433,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     <div class="review-card">
       <div class="review-header">
         <div class="review-title">
-          <span>👤 Dados Pessoais</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Dados Pessoais
         </div>
         <button type="button" class="btn-edit-sec" onclick="editSection('sec-pessoais')">✏ Editar</button>
       </div>
@@ -1389,7 +1456,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     <div class="review-card">
       <div class="review-header">
         <div class="review-title">
-          <span>🎓 Formação Técnica</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            Formação
         </div>
         <button type="button" class="btn-edit-sec" onclick="editSection('sec-curso')">✏ Editar</button>
       </div>
@@ -1403,7 +1471,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     <div class="review-card">
       <div class="review-header">
         <div class="review-title">
-          <span>🚜 Máquinas Capacitadas</span>
+          <img src="img/maquinas capacitadas.png" alt="" style="width: 28px; height: 28px; object-fit: contain; vertical-align: middle;">
+              Máquinas Capacitadas
         </div>
         <button type="button" class="btn-edit-sec" onclick="editSection('sec-maquinas')">✏ Editar</button>
       </div>
@@ -1416,7 +1485,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     <div class="review-card">
       <div class="review-header">
         <div class="review-title">
-          <span>📜 Certificações e Normas Regulamentadoras</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            Certificações e NRs
         </div>
         <button type="button" class="btn-edit-sec" onclick="editSection('sec-certificacoes')">✏ Editar</button>
       </div>
@@ -1429,7 +1499,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     <div class="review-card">
       <div class="review-header">
         <div class="review-title">
-          <span>💼 Experiência Profissional</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Experiência Profissional
         </div>
         <button type="button" class="btn-edit-sec" onclick="editSection('sec-experiencia')">✏ Editar</button>
       </div>
@@ -1442,7 +1513,12 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
     <div class="review-card">
       <div class="review-header">
         <div class="review-title">
-          <span>📌 Informações Adicionais &amp; Disponibilidades</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Informações Adicionais
         </div>
         <button type="button" class="btn-edit-sec" onclick="editSection('sec-adicionais')">✏ Editar</button>
       </div>
@@ -1937,7 +2013,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       setTimeout(() => {
         const sec = document.getElementById(sectionId);
         if (sec) {
-          sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
           sec.style.transition = 'box-shadow 0.3s';
           sec.style.boxShadow = '0 0 0 4px rgba(27, 110, 194, 0.4)';
           setTimeout(() => {
