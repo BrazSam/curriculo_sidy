@@ -1075,7 +1075,7 @@ body {
         <div class="form-card-header">
           <h3 class="form-card-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            Foto de Perfil (Opcional)
+            Foto de Perfil
           </h3>
           <span style="font-size: 0.78rem; color: #dc2626;">* Campo obrigatório</span>
         </div>
@@ -1219,30 +1219,27 @@ body {
           <span class="course-badge-pill">Carga Horária: 66 Horas</span>
         </div>
 
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label for="f-curso-fim">Mês/Ano de Conclusão</label>
-            <input type="month" id="f-curso-fim" class="form-control">
-          </div>
+        <!-- Mês/Ano de Conclusão: largura total -->
+        <div class="form-group">
+          <label for="f-curso-fim">Mês/Ano de Conclusão</label>
+          <input type="month" id="f-curso-fim" class="form-control">
+        </div>
 
-         <div class="form-card-header">
-          <h3 class="form-card-title">
-            Outra Formação
-          </h3>
+        <!-- Outra Formação: largura total, logo abaixo -->
+        <div class="form-card-header">
+          <h3 class="form-card-title">Outra Formação</h3>
           <span style="font-size:.75rem; font-weight:600; color:#64748b; background:#f1f5f9; padding:4px 10px; border-radius:999px;">Opcional</span>
         </div>
-        <p style="color:#64748b;font-size:.85rem;margin:0 0 12px;">Ex.: Ensino Médio, cursos técnicos ou profissionalizantes.</p>
 
         <div class="formacao-block" id="formacao-block-0">
-          <div style="font-weight:600;font-size:.9rem;margin-bottom:12px;">Formação 1</div>
           <div class="form-grid-2">
             <div class="form-group">
               <label>Nome do Curso</label>
-              <input type="text" class="form-control formacao-curso" placeholder="Ex: Ensino Médio Completo">
+              <input type="text" class="form-control formacao-curso" placeholder="Ex: Curso de informática">
             </div>
             <div class="form-group">
               <label>Instituição</label>
-              <input type="text" class="form-control formacao-instituicao" placeholder="Ex: Escola Estadual José de Alencar">
+              <input type="text" class="form-control formacao-instituicao" placeholder="Ex: SiDY Escola">
             </div>
           </div>
           <div class="form-group" style="margin-bottom:0;max-width:180px;">
@@ -1252,10 +1249,7 @@ body {
         </div>
 
         <div class="formacao-block" id="formacao-block-1" style="display:none;background:#f8fafc;border:1.5px solid var(--sidy-border);border-radius:10px;padding:18px;margin-top:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            
-            
-          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"></div>
           <div class="form-grid-2">
             <div class="form-group">
               <label>Nome do Curso</label>
@@ -1270,8 +1264,6 @@ body {
             <label>Ano de Conclusão</label>
             <input type="text" class="form-control formacao-ano" placeholder="Ex: 2022" maxlength="4" inputmode="numeric">
           </div>
-        </div>
-      </div>
         </div>
       </section>
 
@@ -1364,14 +1356,14 @@ body {
           <label style="font-size: 0.9rem; font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">
             Você possui experiência profissional comprovada ou anterior?
           </label>
-          <div style="display: flex; gap: 12px; max-width: 400px;">
+          <div style="display: flex; gap: 16px; margin-bottom: 12px;">
             <label class="custom-check-pill checked" style="flex: 1; justify-content: center;">
-              <input type="radio" name="has_experience" value="sim" checked onchange="toggleExperienceSection(true)">
-              <span>Sim, possuo</span>
+              <input type="radio" name="premium_sidy" value="sim" checked onchange="handlePremiumToggle(true)">
+              <strong>Sim, possuo</strong>
             </label>
             <label class="custom-check-pill" style="flex: 1; justify-content: center;">
-              <input type="radio" name="has_experience" value="nao" onchange="toggleExperienceSection(false)">
-              <span>Não possuo (1º Emprego / Transição)</span>
+              <input type="radio" name="premium_sidy" value="nao" onchange="handlePremiumToggle(false)">
+              <span>Não possuo (1º Emprego / Transição)</span>  
             </label>
           </div>
         </div>
@@ -1497,7 +1489,7 @@ body {
 
         <div class="form-group" style="margin-bottom: 0;">
           <label for="f-outras-info">Outras Observações / Informações Relevantes (Opcional)</label>
-          <textarea id="f-outras-info" class="form-control" rows="2" placeholder="Ex: Fácil aprendizado de operação, pontualidade rigorosa e ótimo trabalho em equipe."></textarea>
+          <textarea id="f-outras-info" class="form-control" rows="2" placeholder="Ex: Fácil aprendizado, pontualidade, trabalho em equipe."></textarea>
         </div>
       </section>
 
