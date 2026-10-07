@@ -987,68 +987,10 @@ body {
         Preencha seus dados gerar o currículo padrão da SIDY Escola de Profissões
       </p>
 
-      <!-- SVG Illustration: Retroescavadeira / Excavator -->
-      <div style="margin: 0 auto 28px; max-width: 440px; filter: drop-shadow(0 12px 24px rgba(15,46,78,0.12));">
-        <svg viewBox="0 0 500 320" width="100%" height="auto" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Ground / Dirt line -->
-          <path d="M10 280 Q 150 270 300 285 T 490 280 L 490 310 L 10 310 Z" fill="#94a3b8" opacity="0.3"/>
-          <ellipse cx="260" cy="285" rx="160" ry="12" fill="#cbd5e1"/>
-          
-          <!-- Track / Esteira -->
-          <g>
-            <rect x="170" y="235" width="180" height="42" rx="21" fill="#1e293b"/>
-            <rect x="176" y="241" width="168" height="30" rx="15" fill="#334155"/>
-            <!-- Wheels -->
-            <circle cx="195" cy="256" r="12" fill="#0f172a" stroke="#64748b" stroke-width="3"/>
-            <circle cx="230" cy="256" r="10" fill="#0f172a"/>
-            <circle cx="260" cy="256" r="10" fill="#0f172a"/>
-            <circle cx="290" cy="256" r="10" fill="#0f172a"/>
-            <circle cx="325" cy="256" r="12" fill="#0f172a" stroke="#64748b" stroke-width="3"/>
-            <!-- Track grips -->
-            <path d="M180 236 L180 276 M200 236 L200 276 M220 236 L220 276 M240 236 L240 276 M260 236 L260 276 M280 236 L280 276 M300 236 L300 276 M320 236 L320 276 M340 236 L340 276" stroke="#475569" stroke-width="2.5"/>
-          </g>
-
-          <!-- Cabin Body (Yellow & Navy) -->
-          <path d="M190 235 L 340 235 L 330 170 L 290 130 L 205 130 L 190 170 Z" fill="#f5b301"/>
-          <!-- Counterweight Navy -->
-          <path d="M180 180 L 210 180 L 210 235 L 180 235 Q 170 210 180 180 Z" fill="#0f2e4e"/>
-          <!-- Cabin Windows -->
-          <path d="M215 140 L 280 140 L 315 175 L 215 175 Z" fill="#e0f2fe" stroke="#0f2e4e" stroke-width="3"/>
-          <path d="M250 140 L 250 175" stroke="#0f2e4e" stroke-width="2.5"/>
-          <path d="M285 142 L 230 175" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
-          <!-- Exhaust pipe -->
-          <rect x="195" y="115" width="6" height="20" rx="2" fill="#475569"/>
-          <!-- Warning beacon -->
-          <rect x="235" y="122" width="12" height="8" rx="3" fill="#ea580c"/>
-
-          <!-- Boom / Lança (Front Backhoe Arm) -->
-          <g>
-            <!-- Pivot Base -->
-            <circle cx="320" cy="205" r="12" fill="#0f2e4e"/>
-            <!-- Arm 1 (Main boom) -->
-            <path d="M320 205 L 400 130 L 415 142 L 332 215 Z" fill="#1b6ec2"/>
-            <!-- Hydraulic cylinder -->
-            <path d="M305 185 L 380 145" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
-            <path d="M340 166 L 390 140" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="408" cy="136" r="8" fill="#0f2e4e"/>
-            <!-- Arm 2 (Dipper arm) -->
-            <path d="M408 136 L 440 215 L 425 220 L 398 145 Z" fill="#f5b301"/>
-            <!-- Bucket (Caçamba) -->
-            <path d="M440 215 Q 470 220 480 250 L 450 265 L 420 240 Z" fill="#0f2e4e"/>
-            <!-- Teeth -->
-            <polygon points="480,250 490,252 485,257" fill="#64748b"/>
-            <polygon points="470,256 478,259 473,264" fill="#64748b"/>
-            <polygon points="460,261 468,264 463,269" fill="#64748b"/>
-          </g>
-
-          <!-- Rear loader bucket or stabilizer leg -->
-          <path d="M185 240 L 150 255 L 145 275 L 175 275 Z" fill="#1faa5a"/>
-
-          <!-- Logo pill on machine body -->
-          <rect x="235" y="195" width="55" height="18" rx="4" fill="#0f2e4e"/>
-          <text x="242" y="208" font-family="'Poppins', sans-serif" font-size="10" font-weight="800" fill="#f5b301">SIDY</text>
-        </svg>
-      </div>
+     <!-- Ilustração: Retroescavadeira -->
+    <div style="margin: 0 auto 32px; max-width: 500px; border-radius: 16px; overflow: hidden;">
+      <img src="img/bannerinicial.png" alt="Banner" style="display: block; width: 100%; height: auto;">
+    </div>
 
       <!-- Action Button -->
       <div>
@@ -1832,7 +1774,7 @@ body {
       const ini = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const fim = new Date(now.getFullYear(), now.getMonth(), 1);
       const fmt = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      document.getElementById('f-curso-inicio').value = fmt(ini); // mês passado
+
       document.getElementById('f-curso-fim').value   = fmt(fim);  // mês atual
     });
 
@@ -2053,7 +1995,7 @@ body {
       state.email = document.getElementById('f-email').value.trim();
       state.cnh = document.getElementById('f-cnh').value;
 
-      state.cursoInicio = document.getElementById('f-curso-inicio').value;
+     
       state.cursoFim = document.getElementById('f-curso-fim').value;
 
       // Machines
