@@ -1030,11 +1030,12 @@ body {
 
           <div style="flex: 1;">
             <p style="font-size: 0.88rem; color: #475569; margin: 0 0 10px 0;">
-              Adicione uma foto nítida e profissional do seu rosto. Você pode tirar uma foto na hora ou escolher da galeria.
+              Adicione uma foto nítida e profissional do seu rosto. Você pode tirar uma foto agora ou escolher da galeria.
             </p>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               <label class="btn-sidy btn-sidy-primary" style="padding: 8px 16px; font-size: 0.88rem; cursor: pointer;">
-                📷 ADICIONAR FOTO
+                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                 ADICIONAR FOTO
                 <input type="file" id="input-photo" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
               </label>
               <button type="button" id="btn-remove-photo" class="btn-sidy btn-sidy-outline" style="padding: 8px 14px; font-size: 0.88rem; display: none;" onclick="removePhoto()">
@@ -1300,11 +1301,11 @@ body {
           </label>
           <div style="display: flex; gap: 16px; margin-bottom: 12px;">
             <label class="custom-check-pill checked" style="flex: 1; justify-content: center;">
-              <input type="radio" name="premium_sidy" value="sim" checked onchange="handlePremiumToggle(true)">
+              <input type="radio" name="has_experience" value="sim" checked onchange="handleExpToggle(true)">
               <strong>Sim, possuo</strong>
             </label>
             <label class="custom-check-pill" style="flex: 1; justify-content: center;">
-              <input type="radio" name="premium_sidy" value="nao" onchange="handlePremiumToggle(false)">
+              <input type="radio" name="has_experience" value="nao" onchange="handleExpToggle(false)">
               <span>Não possuo (1º Emprego / Transição)</span>  
             </label>
           </div>
@@ -1912,6 +1913,27 @@ body {
       }
     }
 
+    function handleExpToggle() {
+    const simRadio = document.querySelector('input[name="has_experience"][value="sim"]');
+    const naoRadio = document.querySelector('input[name="has_experience"][value="nao"]');
+
+    const temExp = !!(simRadio && simRadio.checked);
+
+    // Aplica a classe visual na pill certa
+    if (simRadio) simRadio.closest('.custom-check-pill').classList.toggle('checked', simRadio.checked);
+    if (naoRadio) naoRadio.closest('.custom-check-pill').classList.toggle('checked', naoRadio.checked);
+
+    state.hasExperience = temExp;
+
+    const container = document.getElementById('experience-container');
+    if (container) {
+      container.style.display = temExp ? 'block' : 'none';
+    }
+    if (!temExp) {
+      state.experiencias = [];
+    }
+  }
+
     function toggleExperienceSection(hasExp) {
       state.hasExperience = hasExp;
       const container = document.getElementById('experience-container');
@@ -1952,6 +1974,51 @@ body {
     }
 
 
+    function validateExperience() {
+  // Se o aluno marcou "Não possuo", não valida nada
+  if (!state.hasExperience) return true;
+
+  const blocks = document.querySelectorAll('.exp-block');
+  let valid = true;
+  let firstInvalid = null;
+
+  blocks.forEach(function (block) {
+    // Pula a Experiência 2 se foi removida (display none)
+    if (block.style.display === 'none') return;
+
+    const empresa    = block.querySelector('.exp-empresa');
+    const cargo      = block.querySelector('.exp-cargo');
+    const inicio     = block.querySelector('.exp-inicio');
+    const fim        = block.querySelector('.exp-fim');
+    const atividades = block.querySelector('.exp-atividades');
+
+    // Campos sempre obrigatórios
+    const campos = [empresa, cargo, inicio, atividades];
+
+    // Data de saída só é obrigatória se o campo não estiver desabilitado
+    // (o toggleCurrentJob desabilita quando marca "Trabalho atualmente")
+    if (fim && !fim.disabled) {
+      campos.push(fim);
+    }
+
+    campos.forEach(function (campo) {
+      const vazio = !campo.value || campo.value.trim() === '';
+      campo.classList.toggle('is-invalid', vazio);
+      if (vazio) {
+        valid = false;
+        if (!firstInvalid) firstInvalid = campo;
+          }
+        });
+      });
+
+      if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstInvalid.focus();
+      }
+      return valid;
+    }
+
+
    
     // Form Gathering & Validation
     function validateAndGoToReview() {
@@ -1984,6 +2051,11 @@ body {
         }
         return;
       }
+
+      if (state.hasExperience && !validateExperience()) {
+        alert('Preencha os dados da experiência profissional para continuar.');
+        return;
+      } 
 
       // Collect data into state
       state.nome = nomeEl.value.trim();
