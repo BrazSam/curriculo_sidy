@@ -27,11 +27,11 @@
 .form-control,
 select.form-control,
 textarea.form-control,
-input[type='date'].form-control,
-input[type='month'].form-control {
+input[type="date"],
+input[type="month"] {
   width: 100%;
+  min-width: 0;         /* permite encolher abaixo do tamanho intrínseco */
   max-width: 100%;
-  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -136,8 +136,14 @@ body {
 /* 5. Stepper: esconde os rótulos de texto em telas muito estreitas,
       mantendo só os números dos passos (evita quebra/sobreposição) */
 @media screen and (max-width: 400px) {
-  .stepper-nav .step-text {
-    display: none;
+  .stepper-step {
+    gap: 4px;
+    font-size: 0.72rem;
+  }
+  .step-circle {
+    width: 22px;
+    height: 22px;
+    font-size: 0.68rem;
   }
 }
 
@@ -259,6 +265,8 @@ body {
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;      /* permite os passos quebrarem em vez de cortar */
+  gap: 8px 12px;        /* espaçamento entre passos quebrados */
   position: relative;
 }
 .stepper-step {
@@ -405,6 +413,7 @@ body {
 
 .form-group {
   margin-bottom: 16px;
+  min-width: 0;         /* garante que o item do grid possa encolher */
 }
 .form-group label {
   display: block;
