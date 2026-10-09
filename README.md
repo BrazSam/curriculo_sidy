@@ -8,11 +8,11 @@ Sem cadastro, sem login e sem instalação. Preencha, revise, gere e compartilhe
 
 🔴 **https://curriculosidy.vercel.app/**
 
-## 🖼️ Tela inicial
+## Tela inicial
 
 ![Tela inicial do Gerador de Currículo SIDY](img/bannerinicial.png)
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 - Fluxo em 4 etapas: Início → Preencher → Revisar → Gerar/Compartilhar
 - Formulário completo com validação dos campos obrigatórios
