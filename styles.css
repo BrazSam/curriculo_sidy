@@ -135,15 +135,21 @@ body {
 
 /* 5. Stepper: esconde os rótulos de texto em telas muito estreitas,
       mantendo só os números dos passos (evita quebra/sobreposição) */
-@media screen and (max-width: 400px) {
-  .stepper-step {
+@media screen and (max-width: 480px) {
+  .stepper-container {
     gap: 4px;
-    font-size: 0.72rem;
+  }
+  .stepper-step {
+    flex: 1;              /* distribui os 4 passos igualmente */
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    white-space: nowrap;
   }
   .step-circle {
-    width: 22px;
-    height: 22px;
-    font-size: 0.68rem;
+    width: 20px;
+    height: 20px;
+    font-size: 0.6rem;
   }
 }
 
@@ -265,10 +271,11 @@ body {
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;      /* permite os passos quebrarem em vez de cortar */
-  gap: 8px 12px;        /* espaçamento entre passos quebrados */
+  flex-wrap: nowrap;   /* força uma única linha, sem quebrar */
   position: relative;
 }
+
+
 .stepper-step {
   display: flex;
   align-items: center;
