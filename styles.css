@@ -396,6 +396,7 @@ body {
   padding: 24px;
   margin-bottom: 20px;
   box-shadow: 0 2px 10px rgba(15, 46, 78, 0.04);
+  overflow: hidden;          /* trava qualquer estouro residual */
 }
 .form-card-header {
   display: flex;
@@ -421,6 +422,7 @@ body {
 .form-group {
   margin-bottom: 16px;
   min-width: 0;         /* garante que o item do grid possa encolher */
+  max-width: 100%;
 }
 .form-group label {
   display: block;
