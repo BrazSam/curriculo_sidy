@@ -1,0 +1,900 @@
+/* ESTILOS DO GERADOR DE CURRÍCULO SIDY
+   Ordem: base e ajustes globais → componentes → currículo A4 → impressão.
+   A ordem das regras foi preservada para manter o visual existente. */
+
+/* Variáveis e estilos globais que complementam o Basecoat. */
+:root {
+  color-scheme: light dark;
+  --accent: #2563eb;
+  --accent-contrast: #ffffff;
+  --accent-text: color-mix(in srgb, var(--accent) 72%, #000);
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --text: #14171f;
+  --text-muted: #5b6472;
+  --border: rgba(20, 23, 31, 0.1);
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(20, 23, 31, 0.08);
+  --space: 16px;
+}
+
+/* Impede que campos estourem o container no celular */
+.form-grid-2 > .form-group,
+.form-grid-3 > .form-group {
+  min-width: 0;
+}
+
+.form-control,
+select.form-control,
+textarea.form-control,
+input[type='date'].form-control,
+input[type='month'].form-control {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Quebra texto/placeholders longos dentro dos campos e cards */
+.form-group,
+.form-card,
+.screen-view {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+/* Paletas de cores: data-theme="light" no HTML mantém o tema claro.
+   As regras abaixo também preveem tema escuro, caso ele seja habilitado. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) {
+    --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+    --bg: #101318;
+    --surface: #181c23;
+    --text: #eef1f6;
+    --text-muted: #9aa4b2;
+    --border: rgba(238, 241, 246, 0.12);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+}
+:root:where([data-theme='dark']) {
+  color-scheme: dark;
+  --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+  --bg: #101318;
+  --surface: #181c23;
+  --text: #eef1f6;
+  --text-muted: #9aa4b2;
+  --border: rgba(238, 241, 246, 0.12);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+:root:where([data-theme='light']) {
+  color-scheme: light;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.shell-footer {
+  padding: 24px 0 40px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ============================================
+   RESPONSIVIDADE MOBILE (iOS + Android)
+   ============================================ */
+
+/* 2. iOS: impede o zoom automático ao focar em campos de formulário.
+      O iOS dá zoom quando a fonte é menor que 16px. */
+input,
+select,
+textarea {
+  font-size: 16px !important;
+}
+
+/* 3. Margem de segurança para o "notch" do iPhone e a barra de gestos */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 4. Papel do currículo (210mm) se adapta à tela do celular.
+      IMPORTANTE: o PDF/impressão continuam em 210mm (A4).
+      Este ajuste vale SÓ para a prévia na tela. */
+@media screen and (max-width: 480px) {
+  .resume-wrapper {
+    overflow-x: hidden;
+  }
+  #resume-paper {
+    width: 100%;
+    min-height: auto;
+    transform: scale(0.92);
+    transform-origin: top center;
+  }
+}
+
+/* 5. Stepper: esconde os rótulos de texto em telas muito estreitas,
+      mantendo só os números dos passos (evita quebra/sobreposição) */
+@media screen and (max-width: 400px) {
+  .stepper-nav .step-text {
+    display: none;
+  }
+}
+
+/* 6. Ajusta o rodapé e o fim do formulário para não ficarem
+      atrás da barra de gestos do iPhone / navegação do Android */
+@media screen and (max-width: 480px) {
+  footer,
+  .main-content,
+  .form-footer {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+  }
+}
+
+/* 7. Garante que os chips de máquinas e botões tenham área de toque
+      confortável (mínimo 44px) no celular */
+@media screen and (max-width: 480px) {
+  .custom-check-pill,
+  .btn-sidy {
+    min-height: 44px;
+  }
+}
+
+@media print {
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* Quebra texto longo na aba de Revisão (tela 3) — corrige flex/grid */
+#screen-review .review-card,
+#screen-review .review-card > div,
+#screen-review .review-card span,
+#screen-review .review-card p,
+#screen-review .review-card li {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Garante que qualquer container interno flex também quebre */
+#screen-review .review-card [style*='flex'],
+#screen-review .review-card div {
+  min-width: 0;
+}
+
+:root {
+  --accent: #1b6ec2;
+  --sidy-navy: #0f2e4e;
+  --sidy-blue: #1b6ec2;
+  --sidy-green: #1faa5a;
+  --sidy-yellow: #f5b301;
+  --sidy-surface: #ffffff;
+  --sidy-bg-subtle: #f4f7fb;
+  --sidy-border: #d7e2ee;
+  --radius: 12px;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-heading {
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--sidy-bg-subtle);
+  color: #1e293b;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabeçalho fixo da aplicação */
+.app-header {
+  background: #ffffff;
+  border-bottom: 1px solid var(--sidy-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(15, 46, 78, 0.05);
+}
+.header-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Indicador das quatro etapas */
+.stepper-nav {
+  background: #ffffff;
+  border-bottom: 1px solid var(--sidy-border);
+  padding: 10px 16px;
+}
+.stepper-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: default;
+  transition: all 0.2s;
+}
+.stepper-step.active {
+  color: var(--sidy-navy);
+}
+.stepper-step.completed {
+  color: var(--sidy-green);
+}
+.step-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.stepper-step.active .step-circle {
+  background: var(--sidy-blue);
+  color: #ffffff;
+}
+.stepper-step.completed .step-circle {
+  background: var(--sidy-green);
+  color: #ffffff;
+}
+
+/* Telas: apenas a etapa ativa fica visível */
+.screen-view {
+  display: none;
+  padding: 24px 16px 60px;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+.screen-view.active {
+  display: block;
+  animation: fadeIn 0.25s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Botões da aplicação */
+.btn-sidy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    background-color 0.15s;
+  text-decoration: none;
+}
+.btn-sidy:hover {
+  transform: translateY(-1px);
+}
+.btn-sidy:active {
+  transform: translateY(0);
+}
+.btn-sidy-primary {
+  background: var(--sidy-blue);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(27, 110, 194, 0.35);
+}
+.btn-sidy-primary:hover {
+  background: #155bb5;
+}
+.btn-sidy-green {
+  background: var(--sidy-green);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(31, 170, 90, 0.35);
+}
+.btn-sidy-green:hover {
+  background: #19944d;
+}
+.btn-sidy-outline {
+  background: #ffffff;
+  color: var(--sidy-navy);
+  border: 1.5px solid var(--sidy-border);
+}
+.btn-sidy-outline:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Cartões e campos do formulário */
+.form-card {
+  background: #ffffff;
+  border-radius: var(--radius);
+  border: 1px solid var(--sidy-border);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(15, 46, 78, 0.04);
+}
+.form-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+  margin-bottom: 18px;
+}
+.form-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sidy-navy);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.form-card-title svg {
+  color: var(--sidy-blue);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--sidy-border);
+  background-color: #ffffff;
+  color: #0f172a;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--sidy-blue);
+  box-shadow: 0 0 0 3px rgba(27, 110, 194, 0.15);
+}
+.form-control.is-invalid {
+  border-color: #ef4444 !important;
+  background-color: #fffaf0;
+}
+.invalid-feedback {
+  color: #dc2626;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-top: 4px;
+  display: none;
+}
+.is-invalid + .invalid-feedback {
+  display: block;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .form-grid-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+/* Opções de seleção (checkbox e radio) */
+.custom-check-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--sidy-border);
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #334155;
+}
+.custom-check-pill:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+.custom-check-pill input[type='checkbox'],
+.custom-check-pill input[type='radio'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--sidy-blue);
+  cursor: pointer;
+}
+.custom-check-pill.checked {
+  background: #f0f7ff;
+  border-color: var(--sidy-blue);
+  color: var(--sidy-navy);
+  font-weight: 600;
+}
+
+/* Seleção e prévia da foto */
+.photo-upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+  text-align: center;
+}
+@media (min-width: 500px) {
+  .photo-upload-box {
+    flex-direction: row;
+    text-align: left;
+  }
+}
+.photo-avatar-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  object-fit: cover;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.photo-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Cartão do curso SIDY */
+.fixed-course-box {
+  background: linear-gradient(135deg, #0f2e4e, #1b6ec2);
+  border-radius: 10px;
+  padding: 16px 20px;
+  color: #ffffff;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.course-badge-pill {
+  background: var(--sidy-yellow);
+  color: #0f2e4e;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Lista de máquinas */
+.chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Cartões da revisão */
+.review-card {
+  background: #ffffff;
+  border-radius: var(--radius);
+  border: 1px solid var(--sidy-border);
+  padding: 20px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 8px;
+}
+.review-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sidy-navy);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-edit-sec {
+  background: none;
+  border: 1px solid var(--sidy-border);
+  color: var(--sidy-blue);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-edit-sec:hover {
+  background: #eff6ff;
+  border-color: var(--sidy-blue);
+}
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eff6ff;
+  color: var(--sidy-blue);
+  border: 1px solid #bfdbfe;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 3px;
+}
+.tag-chip.nr {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+/* Prévia do currículo em papel A4 */
+.resume-wrapper {
+  background: #525659;
+  padding: 20px 10px;
+  border-radius: 12px;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+#resume-paper {
+  width: 210mm;
+  min-height: 297mm;
+  background: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  color: #1f2937;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.resume-header {
+  background: linear-gradient(135deg, #0f2e4e 0%, #154575 55%, #1b6ec2 100%);
+  color: #ffffff;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 5px solid var(--sidy-yellow);
+}
+.resume-photo-box {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  border: 4px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.resume-photo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.resume-photo-placeholder {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--sidy-navy);
+  background: #e2e8f0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+.resume-header-info {
+  flex: 1;
+}
+.resume-candidate-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 4px 0;
+  color: #ffffff;
+}
+.resume-candidate-role {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fde047;
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.resume-contacts-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.82rem;
+  color: #e2e8f0;
+}
+.resume-contacts-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.resume-body {
+  padding: 28px 32px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.resume-section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sidy-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 6px;
+  margin: 0 0 12px 0;
+}
+.resume-section-title::before {
+  content: '';
+  width: 6px;
+  height: 16px;
+  background: var(--sidy-blue);
+  border-radius: 2px;
+}
+.resume-item {
+  margin-bottom: 12px;
+}
+.resume-item:last-child {
+  margin-bottom: 0;
+}
+.resume-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3px;
+}
+.resume-item-title {
+  font-weight: 700;
+  font-size: 0.94rem;
+  color: #0f172a;
+}
+.resume-item-sub {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--sidy-blue);
+}
+.resume-item-date {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+.resume-desc-text {
+  font-size: 0.84rem;
+  color: #334155;
+  line-height: 1.45;
+  margin: 4px 0 0 0;
+}
+.resume-chips-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px 8px;
+  align-items: center;
+}
+.resume-pill {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.resume-pill.highlight {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+.resume-pill.nr-pill {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+.resume-footer {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 14px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Impressão: oculta controles e preserva o currículo */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .app-header,
+  .stepper-nav,
+  .no-print,
+  .shell-footer {
+    display: none !important;
+  }
+  #screen-share,
+  #resume-paper,
+  #resume-paper * {
+    visibility: visible;
+  }
+  .resume-wrapper {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  #resume-paper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  /* Mantém as opções legíveis na impressão */
+  .resume-chips-list,
+  #res-machines-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+  }
+  .res-mach-chip,
+  .resume-pill {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    max-width: 100% !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .res-mach-chip .res-mach-icon {
+    flex-shrink: 0;
+  }
+  .resume-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
+/* Chips de máquinas no certificado */
+.res-mach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+}
+.res-mach-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
