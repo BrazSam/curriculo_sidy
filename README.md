@@ -1,4 +1,4 @@
-# 🚜 Gerador de Currículo SIDY
+# Gerador de Currículo SIDY
 
 Aplicação web mobile-first que permite aos alunos do **Curso de Operador de Máquinas Pesadas da SIDY Escola de Profissões** preencher seus dados e gerar um currículo profissional em PDF, pronto para envio.
 
