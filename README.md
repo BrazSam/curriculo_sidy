@@ -8,8 +8,6 @@ Sem cadastro, sem login e sem instalação. Preencha, revise, gere e compartilhe
 
 🔴 **https://curriculosidy.vercel.app/**
 
-## Tela inicial
-
 ![Tela inicial do Gerador de Currículo SIDY](img/bannerinicial.png)
 
 ## Funcionalidades
