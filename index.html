@@ -26,6 +26,33 @@
   --shadow: 0 1px 3px rgba(20, 23, 31, 0.08);
   --space: 16px;
 }
+
+/* Impede que campos estourem o container no celular */
+.form-grid-2 > .form-group,
+.form-grid-3 > .form-group {
+  min-width: 0;
+}
+
+.form-control,
+select.form-control,
+textarea.form-control,
+input[type="date"].form-control,
+input[type="month"].form-control {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Quebra texto/placeholders longos dentro dos campos e cards */
+.form-group,
+.form-card,
+.screen-view {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 /* Theme resolution. Without data-theme the viewer's system preference decides,
    as it always did. With it, the artifact's own choice wins in BOTH directions:
    a page that hardcodes one palette must not be handed the opposite set of
