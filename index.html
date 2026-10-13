@@ -395,23 +395,27 @@
             >
           </div>
 
+          <p class="formation-help" id="outra-formacao-help">Informe outro curso que você concluiu além do curso SIDY acima, como informática, curso técnico ou graduação. Se não tiver outra formação, deixe em branco.</p>
+
           <div class="formacao-block" id="formacao-block-0">
             <div class="form-grid-2">
               <div class="form-group">
-                <label>Nome do Curso</label>
+                <label for="formacao-curso-0">Nome do Curso</label>
                 <input
                   type="text"
                   class="form-control formacao-curso"
                   placeholder="Ex: Curso de informática"
-                />
+                id="formacao-curso-0" maxlength="40" aria-describedby="outra-formacao-help formacao-curso-0-count" />
+                <div class="field-guidance"><small class="character-count" id="formacao-curso-0-count">0 de 40 caracteres</small></div>
               </div>
               <div class="form-group">
-                <label>Instituição</label>
+                <label for="formacao-instituicao-0">Instituição</label>
                 <input
                   type="text"
                   class="form-control formacao-instituicao"
                   placeholder="Ex: SiDY Escola"
-                />
+                id="formacao-instituicao-0" maxlength="40" aria-describedby="outra-formacao-help formacao-instituicao-0-count" />
+                <div class="field-guidance"><small class="character-count" id="formacao-instituicao-0-count">0 de 40 caracteres</small></div>
               </div>
             </div>
             <div class="form-group" style="margin-bottom: 0; max-width: 180px">
@@ -448,20 +452,22 @@
             ></div>
             <div class="form-grid-2">
               <div class="form-group">
-                <label>Nome do Curso</label>
+                <label for="formacao-curso-1">Nome do Curso</label>
                 <input
                   type="text"
                   class="form-control formacao-curso"
                   placeholder="Ex: Curso de Empilhadeira"
-                />
+                id="formacao-curso-1" maxlength="40" aria-describedby="outra-formacao-help formacao-curso-1-count" />
+                <div class="field-guidance"><small class="character-count" id="formacao-curso-1-count">0 de 40 caracteres</small></div>
               </div>
               <div class="form-group">
-                <label>Instituição</label>
+                <label for="formacao-instituicao-1">Instituição</label>
                 <input
                   type="text"
                   class="form-control formacao-instituicao"
                   placeholder="Ex: SENAI"
-                />
+                id="formacao-instituicao-1" maxlength="40" aria-describedby="outra-formacao-help formacao-instituicao-1-count" />
+                <div class="field-guidance"><small class="character-count" id="formacao-instituicao-1-count">0 de 40 caracteres</small></div>
               </div>
             </div>
             <div class="form-group" style="margin-bottom: 0; max-width: 180px">
@@ -720,20 +726,22 @@
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label>Nome da Empresa</label>
+                  <label for="exp-empresa-0">Nome da Empresa</label>
                   <input
                     type="text"
                     class="form-control exp-empresa"
                     placeholder="Ex: Construtora Horizonte Ltda."
-                  />
+                  id="exp-empresa-0" maxlength="40" aria-describedby="exp-empresa-0-help exp-empresa-0-count" />
+                  <div class="field-guidance"><small id="exp-empresa-0-help">Informe o nome da empresa onde trabalhou.</small><small class="character-count" id="exp-empresa-0-count">0 de 40 caracteres</small></div>
                 </div>
                 <div class="form-group">
-                  <label>Cargo / Função</label>
+                  <label for="exp-cargo-0">Cargo / Função</label>
                   <input
                     type="text"
                     class="form-control exp-cargo"
-                    placeholder="Ex: Operador de Escavadeira / Ajudante"
-                  />
+                    placeholder="Ex: Operador de escavadeira"
+                  id="exp-cargo-0" maxlength="30" aria-describedby="exp-cargo-0-help exp-cargo-0-count" />
+                  <div class="field-guidance"><small id="exp-cargo-0-help">Informe o cargo ou a função que exerceu.</small><small class="character-count" id="exp-cargo-0-count">0 de 30 caracteres</small></div>
                 </div>
               </div>
 
@@ -763,12 +771,13 @@
               </div>
 
               <div class="form-group" style="margin-bottom: 0">
-                <label>Principais Atividades / Responsabilidades</label>
+                <label for="exp-atividades-0">Principais Atividades / Responsabilidades</label>
                 <textarea
                   class="form-control exp-atividades"
                   rows="2"
-                  placeholder="Ex: Operação diária de escavadeira em obras de terraplanagem, inspeção preventiva de checklist, abertura de valas e nivelamento de terreno."
-                ></textarea>
+                  placeholder="Ex: Operação de escavadeira, abertura de valas e nivelamento de terreno."
+                id="exp-atividades-0" maxlength="80" aria-describedby="exp-atividades-0-help exp-atividades-0-count" ></textarea>
+                  <div class="field-guidance"><small id="exp-atividades-0-help">Resuma as principais tarefas que você realizava.</small><small class="character-count" id="exp-atividades-0-count">0 de 80 caracteres</small></div>
               </div>
             </div>
 
@@ -807,20 +816,22 @@
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label>Nome da Empresa</label>
+                  <label for="exp-empresa-1">Nome da Empresa</label>
                   <input
                     type="text"
                     class="form-control exp-empresa"
                     placeholder="Ex: Terraplanagem &amp; Pavimentação"
-                  />
+                  id="exp-empresa-1" maxlength="40" aria-describedby="exp-empresa-1-help exp-empresa-1-count" />
+                  <div class="field-guidance"><small id="exp-empresa-1-help">Informe o nome da empresa onde trabalhou.</small><small class="character-count" id="exp-empresa-1-count">0 de 40 caracteres</small></div>
                 </div>
                 <div class="form-group">
-                  <label>Cargo / Função</label>
+                  <label for="exp-cargo-1">Cargo / Função</label>
                   <input
                     type="text"
                     class="form-control exp-cargo"
                     placeholder="Ex: Operador de Retroescavadeira"
-                  />
+                  id="exp-cargo-1" maxlength="30" aria-describedby="exp-cargo-1-help exp-cargo-1-count" />
+                  <div class="field-guidance"><small id="exp-cargo-1-help">Informe o cargo ou a função que exerceu.</small><small class="character-count" id="exp-cargo-1-count">0 de 30 caracteres</small></div>
                 </div>
               </div>
 
@@ -850,12 +861,13 @@
               </div>
 
               <div class="form-group" style="margin-bottom: 0">
-                <label>Principais Atividades / Responsabilidades</label>
+                <label for="exp-atividades-1">Principais Atividades / Responsabilidades</label>
                 <textarea
                   class="form-control exp-atividades"
                   rows="2"
-                  placeholder="Ex: Movimentação de cargas, carregamento de caminhões caçamba e manutenção básica do maquinário."
-                ></textarea>
+                  placeholder="Ex: Movimentação de cargas e carregamento de caminhões."
+                id="exp-atividades-1" maxlength="80" aria-describedby="exp-atividades-1-help exp-atividades-1-count" ></textarea>
+                  <div class="field-guidance"><small id="exp-atividades-1-help">Resuma as principais tarefas que você realizava.</small><small class="character-count" id="exp-atividades-1-count">0 de 80 caracteres</small></div>
               </div>
             </div>
 
@@ -953,11 +965,12 @@
               >Outras Observações / Informações Relevantes (Opcional)</label
             >
             <textarea
-              id="f-outras-info"
+              id="f-outras-info" maxlength="60" aria-describedby="f-outras-info-help f-outras-info-count"
               class="form-control"
               rows="2"
               placeholder="Ex: Fácil aprendizado, pontualidade, trabalho em equipe."
             ></textarea>
+            <div class="field-guidance"><small id="f-outras-info-help">Inclua algo relevante para a vaga que ainda não informou.</small><small class="character-count" id="f-outras-info-count">0 de 60 caracteres</small></div>
           </div>
         </section>
 
@@ -1364,7 +1377,9 @@
 
       <!-- PRÉVIA DO CURRÍCULO — formato A4 -->
       <div class="resume-wrapper">
+        <div class="resume-preview">
         <div id="resume-paper">
+        <div class="resume-content">
           <!-- Cabeçalho do currículo -->
           <div class="resume-header">
             <div class="resume-photo-box" id="res-photo-wrapper">
@@ -1405,10 +1420,7 @@
                   <span class="resume-item-title">Curso de Operador de Máquinas Pesadas</span>
                   <span class="resume-item-date" id="res-dates-course">Concluído</span>
                 </div>
-                <div id="res-sec-formacoes" style="display: none">
-                  <div class="resume-section-title">Outras Formações</div>
-                  <div id="res-formacoes-list"></div>
-                </div>
+
                 <div class="resume-item-sub"
                   >SIDY Escola de Profissões · Carga Horária: 66 Horas</div
                 >
@@ -1419,6 +1431,11 @@
                 </p>
               </div>
             </div>
+
+                <div id="res-sec-formacoes" style="display: none">
+                  <div class="resume-section-title">Outras Formações</div>
+                  <div id="res-formacoes-list"></div>
+                </div>
 
             <!-- Seção Máquinas Operadas -->
             <div>
@@ -1465,6 +1482,8 @@
           <div class="resume-footer">
             <div id="res-gen-date"> </div>
           </div>
+        </div>
+        </div>
         </div>
       </div>
     </main>

@@ -118,21 +118,6 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* 4. Papel do currículo (210mm) se adapta à tela do celular.
-      IMPORTANTE: o PDF/impressão continuam em 210mm (A4).
-      Este ajuste vale SÓ para a prévia na tela. */
-@media screen and (max-width: 480px) {
-  .resume-wrapper {
-    overflow-x: hidden;
-  }
-  #resume-paper {
-    width: 100%;
-    min-height: auto;
-    transform: scale(0.92);
-    transform-origin: top center;
-  }
-}
-
 /* 5. Stepper: esconde os rótulos de texto em telas muito estreitas,
       mantendo só os números dos passos (evita quebra/sobreposição) */
 @media screen and (max-width: 480px) {
@@ -838,65 +823,6 @@ body {
   color: #64748b;
 }
 
-/* Impressão: oculta controles e preserva o currículo */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  .app-header,
-  .stepper-nav,
-  .no-print,
-  .shell-footer {
-    display: none !important;
-  }
-  #screen-share,
-  #resume-paper,
-  #resume-paper * {
-    visibility: visible;
-  }
-  .resume-wrapper {
-    background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: visible !important;
-  }
-  #resume-paper {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100% !important;
-    min-height: auto !important;
-    box-shadow: none !important;
-    border: none !important;
-  }
-  /* Mantém as opções legíveis na impressão */
-  .resume-chips-list,
-  #res-machines-list {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 5px !important;
-  }
-  .res-mach-chip,
-  .resume-pill {
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    max-width: 100% !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-  .res-mach-chip .res-mach-icon {
-    flex-shrink: 0;
-  }
-  .resume-item {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-  @page {
-    size: A4;
-    margin: 0;
-  }
-}
-
 /* Chips de máquinas no certificado */
 .res-mach-chip {
   display: inline-flex;
@@ -915,4 +841,87 @@ body {
   width: 26px;
   height: 26px;
   object-fit: contain;
+}
+
+/* Orientações visíveis também no celular, sem depender de hover. */
+.formation-help {
+  margin: 0 0 18px;
+  color: #475569;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.field-guidance {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 6px;
+  color: #475569;
+}
+.field-guidance small { font-size: 0.75rem; line-height: 1.5; }
+.character-count { margin-left: auto; text-align: right; }
+.character-count.at-limit { color: #854d0e; font-weight: 600; }
+
+/* Campos nativos precisam poder encolher também no Safari do celular. */
+.form-grid-2, .form-grid-3 { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 640px) {
+  .form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+input.form-control[type="date"], input.form-control[type="month"] {
+  display: block; appearance: none; -webkit-appearance: none;
+  width: 100%; min-width: 0; max-width: 100%; min-inline-size: 0;
+  min-height: 46px;
+}
+input[type="date"]::-webkit-date-and-time-value,
+input[type="month"]::-webkit-date-and-time-value { min-width: 0; text-align: left; }
+input[type="date"]::-webkit-datetime-edit,
+input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
+@media screen and (max-width: 480px) {
+  .form-card { padding: 18px 14px; }
+  .form-card-header { flex-wrap: wrap; gap: 8px; }
+}
+/* Um papel A4 único; só a escala da prévia depende da largura da tela. */
+.resume-wrapper { display: block; overflow: hidden; }
+.resume-preview { position: relative; width: var(--preview-width, 210mm); height: var(--preview-height, 296mm); margin: 0 auto; }
+#resume-paper {
+  width: 210mm; min-width: 210mm; max-width: none;
+  height: 296mm; min-height: 296mm; display: block;
+  position: absolute; top: 0; left: 0;
+  transform-origin: top left;
+}
+.resume-content {
+  position: absolute; top: 0; left: 0;
+  width: 210mm; min-height: 296mm; display: flex; flex-direction: column;
+  transform-origin: top left;
+  transform: translateX(var(--resume-left, 0px)) scale(var(--resume-fit, 1));
+}
+.resume-content .resume-header { padding: 22px 28px; gap: 20px; }
+.resume-content .resume-body { padding: 20px 28px; gap: 14px; }
+.resume-content .resume-section-title { margin-bottom: 8px; }
+.resume-content .resume-footer { padding: 10px 28px; }
+.resume-content .resume-header-info { min-width: 0; }
+.resume-content .resume-item-header { gap: 12px; }
+.resume-content .resume-item-title { min-width: 0; overflow-wrap: anywhere; }
+.resume-content .resume-item-date { flex-shrink: 0; }
+.resume-content .resume-contacts-row span { min-width: 0; overflow-wrap: anywhere; }
+.resume-content .res-mach-chip, .resume-content .resume-pill { white-space: normal; overflow-wrap: anywhere; }
+.resume-content .res-mach-icon { flex-shrink: 0; }
+@media screen { #resume-paper { transform: scale(var(--preview-scale, 1)); } }
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  html, body { width: 210mm; margin: 0 !important; padding: 0 !important; background: white; }
+  body > :not(#screen-share) { display: none !important; }
+  #screen-share > :not(.resume-wrapper) { display: none !important; }
+  #screen-share { display: block !important; width: 210mm !important; max-width: none !important; margin: 0 !important; padding: 0 !important; animation: none !important; }
+  .resume-wrapper { width: 210mm; background: none; padding: 0; margin: 0; border-radius: 0; overflow: visible; }
+  .resume-preview { width: 210mm; height: 296mm; margin: 0; }
+  #resume-paper { position: relative; transform: none !important; box-shadow: none; border: 0; break-inside: avoid; }
+}
+
+#res-additional-chips { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+@media print { .resume-content { break-inside: avoid; } #resume-paper { overflow: hidden; } }
+
+@media print {
+ html, body, #screen-share { height: 296mm !important; min-height: 0 !important; overflow: hidden !important; }
 }

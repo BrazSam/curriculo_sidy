@@ -187,6 +187,8 @@ function validateField(input, required = input.required) {
   if (!input.disabled) {
     if (required && !value) {
       message = 'Preencha este campo.';
+    } else if (input.maxLength > 0 && input.value.length > input.maxLength) {
+      message = `Use no máximo ${input.maxLength} caracteres.`;
     } else if (input.id === 'f-telefone' && !/^\d{10,11}$/.test(value.replace(/\D/g, ''))) {
       message = 'Informe o telefone com DDD: 10 ou 11 dígitos.';
     } else if (!input.validity.valid) {
@@ -291,6 +293,7 @@ function removeExp2() {
     el.disabled = false;
     delete el.dataset.previous;
     setFieldError(el, '');
+    updateCharacterCount(el);
   });
 }
 
@@ -771,16 +774,19 @@ function generateResumeAndShow() {
   const additional = [...state.adicionais];
   if (state.outrasInfo) additional.push(state.outrasInfo);
   adChips.replaceChildren(...additional.map((a) => textElement('span', '✓ ' + a, 'resume-pill')));
-  adChips.style.display = additional.length ? 'flex' : 'none';
+  adChips.style.display = additional.length ? 'grid' : 'none';
   adSec.style.display = additional.length ? 'block' : 'none';
   exNotes.textContent = '';
   exNotes.style.display = 'none';
 
   goToStep(4);
+  fitResumeToPage();
+  prepareResumeLayout();
 }
 
 // 12. IMPRESSÃO E COMPARTILHAMENTO
-function printOrSavePDF() {
+async function printOrSavePDF() {
+  await prepareResumeLayout();
   window.print();
 }
 
@@ -841,7 +847,7 @@ async function shareOnWhatsApp(button) {
     }
 
     // Espera as fontes e captura em alta resolução.
-    await document.fonts.ready;
+    await prepareResumeLayout();
     const w = paper.offsetWidth;
     const h = paper.offsetHeight;
     let scale = 3;
@@ -854,23 +860,28 @@ async function shareOnWhatsApp(button) {
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
+      windowWidth: 1024,
+      onclone: (doc) => {
+        const clonedPaper = doc.getElementById('resume-paper');
+        clonedPaper.style.transform = 'none';
+        const wrapper = clonedPaper.closest('.resume-wrapper');
+        wrapper.style.overflow = 'visible';
+        wrapper.style.width = '210mm';
+        wrapper.style.padding = '0';
+        const preview = clonedPaper.closest('.resume-preview');
+        preview.style.width = '210mm';
+        preview.style.height = '296mm';
+      },
     });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new JSPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
     const pageW = 210,
       pageH = 297;
-    const imgH = (canvas.height * pageW) / canvas.width;
-
-    // Preserva a paginação usada pelo currículo.
-    pdf.addImage(imgData, 'PNG', 0, 0, pageW, imgH);
-    let heightLeft = imgH - pageH;
-    let position = 0;
-    while (heightLeft > 2) {
-      position -= pageH;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, pageW, imgH);
-      heightLeft -= pageH;
-    }
+    // Ajuste proporcional único: nunca corta o conteúdo nem adiciona páginas.
+    const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+    const imgW = canvas.width * ratio;
+    const imgH = canvas.height * ratio;
+    pdf.addImage(imgData, 'PNG', (pageW - imgW) / 2, 0, imgW, imgH);
     const file = new File([pdf.output('blob')], nomeArquivo, { type: 'application/pdf' });
 
     try {
@@ -896,3 +907,47 @@ async function shareOnWhatsApp(button) {
     btn.disabled = false;
   }
 }
+
+// Ajuda persistente e contadores dos campos com limite de texto.
+function updateCharacterCount(field) {
+  const counter = document.getElementById(field.id + '-count');
+  if (!counter) return;
+  const used = field.value.length;
+  const max = field.maxLength;
+  counter.textContent = used + ' de ' + max + ' caracteres' + (used >= max ? ' — limite atingido' : '');
+  counter.classList.toggle('at-limit', used >= max);
+}
+document.querySelectorAll('.exp-empresa, .exp-cargo, .exp-atividades, #f-outras-info, .formacao-curso, .formacao-instituicao').forEach((field) => {
+  field.addEventListener('input', () => updateCharacterCount(field));
+  updateCharacterCount(field);
+});
+window.addEventListener('pageshow', () => {
+  document.querySelectorAll('.exp-empresa, .exp-cargo, .exp-atividades, #f-outras-info, .formacao-curso, .formacao-instituicao').forEach(updateCharacterCount);
+});
+
+// Mede em largura A4 antes de reduzir; celular e computador usam o mesmo documento.
+function fitResumeToPage() {
+  const paper = document.getElementById('resume-paper');
+  const content = paper.querySelector('.resume-content');
+  if (!paper.offsetWidth) return;
+  const scale = Math.min(1, (paper.clientHeight - 2) / content.scrollHeight);
+  paper.style.setProperty('--resume-fit', scale);
+  paper.style.setProperty('--resume-left', ((paper.clientWidth * (1 - scale)) / 2) + 'px');
+  const wrapper = paper.closest('.resume-wrapper');
+  const style = getComputedStyle(wrapper);
+  const available = wrapper.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  const previewScale = Math.min(1, available / paper.offsetWidth);
+  const preview = paper.closest('.resume-preview');
+  preview.style.setProperty('--preview-width', paper.offsetWidth * previewScale + 'px');
+  preview.style.setProperty('--preview-height', paper.offsetHeight * previewScale + 'px');
+  paper.style.setProperty('--preview-scale', previewScale);
+}
+async function prepareResumeLayout() {
+  await document.fonts.ready;
+  await Promise.all(Array.from(document.querySelectorAll('#resume-paper img')).map(img =>
+    img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
+  fitResumeToPage();
+}
+window.addEventListener('beforeprint', fitResumeToPage);
+window.addEventListener('afterprint', fitResumeToPage);
+window.addEventListener('resize', fitResumeToPage);
