@@ -803,14 +803,14 @@ function clearShareFallback() {
 
 // O link do WhatsApp aceita texto, mas não anexa arquivos locais.
 // Mantém o PDF disponível para download e orienta o envio manual.
-function showShareFallback(file, message) {
+function showShareFallback(file) {
   clearShareFallback();
   shareDownloadUrl = URL.createObjectURL(file);
   const download = document.getElementById('share-download');
   download.href = shareDownloadUrl;
   download.download = file.name;
   document.getElementById('share-whatsapp-link').href =
-    'https://wa.me/?text=' + encodeURIComponent(message);
+    'https://api.whatsapp.com/send';
   const panel = document.getElementById('share-fallback');
   panel.hidden = false;
   panel.focus();
@@ -826,15 +826,6 @@ async function shareOnWhatsApp(button) {
   btn.disabled = true;
   clearShareFallback();
 
-  const machinesText = state.maquinas.join(', ');
-  const msg =
-    '*CURRÍCULO DE OPERADOR DE MÁQUINAS PESADAS*\n' +
-    '*Nome:* ' +
-    state.nome +
-    '\n' +
-    '*Qualificação:* SIDY Escola de Profissões (66 Horas)\n' +
-    (machinesText ? '*Máquinas:* ' + machinesText + '\n' : '') +
-    '\n_Currículo completo certificado gerado pela SIDY Escola de Profissões._';
   const nomeArquivo = 'Curriculo_SIDY_' + (state.nome.replace(/\s+/g, '_') || 'Aluno') + '.pdf';
 
   try {
@@ -890,14 +881,14 @@ async function shareOnWhatsApp(button) {
         typeof navigator.canShare === 'function' &&
         navigator.canShare({ files: [file] })
       ) {
-        await navigator.share({ files: [file], title: 'Meu Currículo SIDY', text: msg });
+        await navigator.share({ files: [file] });
         return;
       }
     } catch (err) {
       // Cancelar é uma escolha do usuário; não abre outra janela nem baixa arquivos.
       if (err && err.name === 'AbortError') return;
     }
-    showShareFallback(file, msg);
+    showShareFallback(file);
   } catch (err) {
     console.error(err);
     alert('Não foi possível gerar o PDF. Use “Salvar em PDF / Imprimir” ou tente novamente.');
@@ -930,9 +921,9 @@ function fitResumeToPage() {
   const paper = document.getElementById('resume-paper');
   const content = paper.querySelector('.resume-content');
   if (!paper.offsetWidth) return;
-  const scale = Math.min(1, (paper.clientHeight - 2) / content.scrollHeight);
+  const scale = Math.min(1, paper.clientWidth / content.offsetWidth, (paper.clientHeight - 2) / content.scrollHeight);
   paper.style.setProperty('--resume-fit', scale);
-  paper.style.setProperty('--resume-left', ((paper.clientWidth * (1 - scale)) / 2) + 'px');
+  paper.style.setProperty('--resume-left', ((paper.clientWidth - content.offsetWidth * scale) / 2) + 'px');
   const wrapper = paper.closest('.resume-wrapper');
   const style = getComputedStyle(wrapper);
   const available = wrapper.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);

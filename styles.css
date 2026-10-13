@@ -925,3 +925,27 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
 @media print {
  html, body, #screen-share { height: 296mm !important; min-height: 0 !important; overflow: hidden !important; }
 }
+
+/* Impressão nativa: zoom reduz também a caixa de layout no Safari.
+   Transform apenas reduz o desenho e pode deixar uma segunda página vazia. */
+@media print {
+  @page { size: A4 portrait; margin: 8mm; }
+  html, body, #screen-share {
+    display: block !important; width: 194mm !important;
+    height: auto !important; min-height: 0 !important;
+    overflow: visible !important;
+  }
+  .resume-wrapper { width: 194mm; }
+  .resume-preview { width: 194mm; height: 279mm; }
+  #resume-paper {
+    width: 194mm; min-width: 194mm;
+    height: 279mm; min-height: 279mm;
+    position: relative; overflow: hidden;
+  }
+  .resume-content {
+    position: relative; transform: none;
+    zoom: var(--resume-fit, 1);
+    margin: 0 auto;
+    break-inside: auto;
+  }
+}
