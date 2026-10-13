@@ -785,65 +785,47 @@ function generateResumeAndShow() {
 }
 
 // 12. IMPRESSÃO E COMPARTILHAMENTO
+let printDownloadUrl = null;
+let preparingPrintPDF = false;
 async function printOrSavePDF() {
-  await prepareResumeLayout();
-  window.print();
-}
-
-let shareDownloadUrl = null;
-
-function clearShareFallback() {
-  document.getElementById('share-fallback').hidden = true;
-  document.getElementById('share-download').removeAttribute('href');
-  document.getElementById('share-download').removeAttribute('download');
-  document.getElementById('share-whatsapp-link').removeAttribute('href');
-  if (shareDownloadUrl) URL.revokeObjectURL(shareDownloadUrl);
-  shareDownloadUrl = null;
-}
-
-// O link do WhatsApp aceita texto, mas não anexa arquivos locais.
-// Mantém o PDF disponível para download e orienta o envio manual.
-function showShareFallback(file, message) {
-  clearShareFallback();
-  shareDownloadUrl = URL.createObjectURL(file);
-  const download = document.getElementById('share-download');
-  download.href = shareDownloadUrl;
-  download.download = file.name;
-  document.getElementById('share-whatsapp-link').href =
-    'https://wa.me/?text=' + encodeURIComponent(message);
-  const panel = document.getElementById('share-fallback');
-  panel.hidden = false;
-  panel.focus();
-}
-
-// Envia o PDF pelo compartilhamento do celular, quando disponível.
-async function shareOnWhatsApp(button) {
-  const paper = document.getElementById('resume-paper');
-  const btn = button || document.getElementById('btn-share-whatsapp');
-  if (!paper || btn.disabled) return;
-  const originalContent = Array.from(btn.childNodes);
-  btn.textContent = 'Gerando PDF...';
-  btn.disabled = true;
-  clearShareFallback();
-
-  const machinesText = state.maquinas.join(', ');
-  const msg =
-    '*CURRÍCULO DE OPERADOR DE MÁQUINAS PESADAS*\n' +
-    '*Nome:* ' +
-    state.nome +
-    '\n' +
-    '*Qualificação:* SIDY Escola de Profissões (66 Horas)\n' +
-    (machinesText ? '*Máquinas:* ' + machinesText + '\n' : '') +
-    '\n_Currículo completo certificado gerado pela SIDY Escola de Profissões._';
-  const nomeArquivo = 'Curriculo_SIDY_' + (state.nome.replace(/\s+/g, '_') || 'Aluno') + '.pdf';
-
+  if (preparingPrintPDF) return;
+  preparingPrintPDF = true;
+  // Abre no gesto do usuário para evitar bloqueio de pop-up no celular.
+  const viewer = window.open('', '_blank');
+  if (viewer) {
+    viewer.opener = null;
+    viewer.document.title = 'Preparando currículo';
+    viewer.document.body.textContent = 'Preparando seu PDF…';
+  }
   try {
+    const file = await createResumePDF();
+    if (printDownloadUrl) URL.revokeObjectURL(printDownloadUrl);
+    printDownloadUrl = URL.createObjectURL(file);
+    if (viewer && !viewer.closed) {
+      viewer.location.replace(printDownloadUrl);
+    } else {
+      const link = document.createElement('a');
+      link.href = printDownloadUrl;
+      link.download = file.name;
+      document.body.append(link);
+      link.click();
+      link.remove();
+    }
+  } catch (err) {
+    if (viewer && !viewer.closed) viewer.close();
+    console.error(err);
+    alert('Não foi possível gerar o PDF. Recarregue a página e tente novamente.');
+  } finally {
+    preparingPrintPDF = false;
+  }
+}
+
+async function createResumePDF() {
+  const paper = document.getElementById('resume-paper');
+  const nomeArquivo = 'Curriculo_SIDY_' + (state.nome.replace(/\s+/g, '_') || 'Aluno') + '.pdf';
     const JSPDF = window.jspdf && window.jspdf.jsPDF;
     if (!JSPDF || !window.html2canvas) {
-      alert(
-        'Não foi possível carregar a geração de PDF. Recarregue a página ou use “Salvar em PDF / Imprimir”.',
-      );
-      return;
+      throw new Error('As bibliotecas de PDF não carregaram. Recarregue a página e tente novamente.');
     }
 
     // Espera as fontes e captura em alta resolução.
@@ -882,7 +864,49 @@ async function shareOnWhatsApp(button) {
     const imgW = canvas.width * ratio;
     const imgH = canvas.height * ratio;
     pdf.addImage(imgData, 'PNG', (pageW - imgW) / 2, 0, imgW, imgH);
-    const file = new File([pdf.output('blob')], nomeArquivo, { type: 'application/pdf' });
+
+  return new File([pdf.output('blob')], nomeArquivo, { type: 'application/pdf' });
+}
+
+
+let shareDownloadUrl = null;
+
+function clearShareFallback() {
+  document.getElementById('share-fallback').hidden = true;
+  document.getElementById('share-download').removeAttribute('href');
+  document.getElementById('share-download').removeAttribute('download');
+  document.getElementById('share-whatsapp-link').removeAttribute('href');
+  if (shareDownloadUrl) URL.revokeObjectURL(shareDownloadUrl);
+  shareDownloadUrl = null;
+}
+
+// O link abre o WhatsApp sem mensagem; o arquivo deve ser anexado manualmente.
+// Mantém o PDF disponível para download e orienta o envio manual.
+function showShareFallback(file) {
+  clearShareFallback();
+  shareDownloadUrl = URL.createObjectURL(file);
+  const download = document.getElementById('share-download');
+  download.href = shareDownloadUrl;
+  download.download = file.name;
+  document.getElementById('share-whatsapp-link').href =
+    'https://api.whatsapp.com/send';
+  const panel = document.getElementById('share-fallback');
+  panel.hidden = false;
+  panel.focus();
+}
+
+// Envia o PDF pelo compartilhamento do celular, quando disponível.
+async function shareOnWhatsApp(button) {
+  const paper = document.getElementById('resume-paper');
+  const btn = button || document.getElementById('btn-share-whatsapp');
+  if (!paper || btn.disabled) return;
+  const originalContent = Array.from(btn.childNodes);
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  clearShareFallback();
+
+  try {
+    const file = await createResumePDF();
 
     try {
       if (
@@ -890,14 +914,14 @@ async function shareOnWhatsApp(button) {
         typeof navigator.canShare === 'function' &&
         navigator.canShare({ files: [file] })
       ) {
-        await navigator.share({ files: [file], title: 'Meu Currículo SIDY', text: msg });
+        await navigator.share({ files: [file] });
         return;
       }
     } catch (err) {
       // Cancelar é uma escolha do usuário; não abre outra janela nem baixa arquivos.
       if (err && err.name === 'AbortError') return;
     }
-    showShareFallback(file, msg);
+    showShareFallback(file);
   } catch (err) {
     console.error(err);
     alert('Não foi possível gerar o PDF. Use “Salvar em PDF / Imprimir” ou tente novamente.');
