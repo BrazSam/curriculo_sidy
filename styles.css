@@ -949,3 +949,29 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
     break-inside: auto;
   }
 }
+
+/* Alturas iguais por linha e marcadores independentes da linha de texto. */
+.resume-content .resume-chips-list { align-items: stretch; }
+.resume-content .resume-pill, .resume-content .res-mach-chip {
+  display: flex; align-items: center; line-height: 1.4;
+}
+.resume-content .resume-section-title {
+  display: block; position: relative; padding-left: 14px; line-height: 1.4;
+}
+.resume-content .resume-section-title::before {
+  position: absolute; left: 0; top: 0.45em;
+}
+#resume-print-image { display: none; }
+@media print {
+  body.resume-print-ready { display: block !important; height: auto !important; }
+  body.resume-print-ready > * { display: none !important; }
+  body.resume-print-ready > #resume-print-image {
+    display: block !important; position: static !important;
+    width: 190mm !important; height: auto !important;
+    max-width: 100% !important; max-height: 270mm !important;
+    margin: 0 auto !important; padding: 0 !important;
+    object-fit: contain; break-inside: avoid; page-break-inside: avoid;
+  }
+}
+
+@media print { body.resume-print-ready > #screen-share { display: none !important; } }

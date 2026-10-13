@@ -665,6 +665,8 @@ function renderReview() {
 
 // 11. CURRÍCULO A4 — preenche a prévia final
 function generateResumeAndShow() {
+  document.getElementById('resume-print-image')?.remove();
+  document.body.classList.remove('resume-print-ready');
   clearShareFallback();
   // Nome do candidato
   document.getElementById('res-name').textContent = state.nome.toUpperCase();
@@ -785,9 +787,65 @@ function generateResumeAndShow() {
 }
 
 // 12. IMPRESSÃO E COMPARTILHAMENTO
+let preparingResumePrint = false;
 async function printOrSavePDF() {
-  await prepareResumeLayout();
-  window.print();
+  if (preparingResumePrint) return;
+  preparingResumePrint = true;
+  const button = document.querySelector('[onclick="printOrSavePDF()"]');
+  const originalLabel = button ? button.innerHTML : '';
+  if (button) { button.disabled = true; button.textContent = 'Preparando impressão...'; }
+  try {
+    const canvas = await captureResumeCanvas();
+    const image = new Image();
+    image.id = 'resume-print-image';
+    image.alt = 'Currículo completo';
+    image.src = canvas.toDataURL('image/png');
+    await image.decode();
+    document.getElementById('resume-print-image')?.remove();
+    document.body.append(image);
+    document.body.classList.add('resume-print-ready');
+    // Uma imagem é um elemento indivisível: o Safari não pagina os cartões internos.
+    window.print();
+  } catch (error) {
+    console.error(error);
+    alert('Não foi possível preparar a impressão. Tente novamente.');
+  } finally {
+    preparingResumePrint = false;
+    if (button) { button.disabled = false; button.innerHTML = originalLabel; }
+  }
+}
+
+async function captureResumeCanvas() {
+  if (!window.html2canvas) throw new Error('Biblioteca de captura indisponível');
+  const paper = document.getElementById('resume-paper');
+    // Espera as fontes e captura em alta resolução.
+    await prepareResumeLayout();
+    const w = paper.offsetWidth;
+    const h = paper.offsetHeight;
+    let scale = 3;
+    const maxPixels = 14000000;
+    if (w * h * scale * scale > maxPixels) {
+      scale = Math.max(1.5, Math.sqrt(maxPixels / (w * h)));
+    }
+    return await window.html2canvas(paper, {
+      scale,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+      windowWidth: 1024,
+      onclone: (doc) => {
+        const clonedPaper = doc.getElementById('resume-paper');
+        clonedPaper.style.transform = 'none';
+        const wrapper = clonedPaper.closest('.resume-wrapper');
+        wrapper.style.overflow = 'visible';
+        wrapper.style.width = '210mm';
+        wrapper.style.padding = '0';
+        const preview = clonedPaper.closest('.resume-preview');
+        preview.style.width = '210mm';
+        preview.style.height = '296mm';
+      },
+    });
+
 }
 
 let shareDownloadUrl = null;
@@ -837,33 +895,7 @@ async function shareOnWhatsApp(button) {
       return;
     }
 
-    // Espera as fontes e captura em alta resolução.
-    await prepareResumeLayout();
-    const w = paper.offsetWidth;
-    const h = paper.offsetHeight;
-    let scale = 3;
-    const maxPixels = 14000000;
-    if (w * h * scale * scale > maxPixels) {
-      scale = Math.max(1.5, Math.sqrt(maxPixels / (w * h)));
-    }
-    const canvas = await window.html2canvas(paper, {
-      scale,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      windowWidth: 1024,
-      onclone: (doc) => {
-        const clonedPaper = doc.getElementById('resume-paper');
-        clonedPaper.style.transform = 'none';
-        const wrapper = clonedPaper.closest('.resume-wrapper');
-        wrapper.style.overflow = 'visible';
-        wrapper.style.width = '210mm';
-        wrapper.style.padding = '0';
-        const preview = clonedPaper.closest('.resume-preview');
-        preview.style.width = '210mm';
-        preview.style.height = '296mm';
-      },
-    });
+    const canvas = await captureResumeCanvas();
     const imgData = canvas.toDataURL('image/png');
     const pdf = new JSPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
     const pageW = 210,
