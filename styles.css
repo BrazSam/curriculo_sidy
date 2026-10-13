@@ -975,3 +975,48 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
 }
 
 @media print { body.resume-print-ready > #screen-share { display: none !important; } }
+
+/* Mantém o respiro no documento, sem reservar margem para o rodapé do navegador. */
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  html { width: 210mm !important; }
+  body.resume-print-ready {
+    width: 210mm !important; padding: 8mm !important;
+    margin: 0 !important; box-sizing: border-box;
+  }
+}
+.resume-content .resume-pill { align-items: flex-start; padding: 6px 10px; }
+.resume-content .resume-footer:has(#res-gen-date:empty) { display: none; }
+
+/* Tela de celulares: toque confortável e campos acessíveis com teclado aberto. */
+@media screen {
+  .form-control { scroll-margin-block: 120px 32px; }
+  .chips-grid { grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); }
+  .custom-check-pill input { flex-shrink: 0; }
+  .custom-check-pill > span { min-width: 0; }
+  .btn-sidy svg, .form-card-title svg, .step-circle { flex-shrink: 0; }
+}
+@media screen and (max-width: 600px) {
+  .screen-view { padding: 20px 12px 40px; }
+  .screen-view .btn-sidy { width: 100%; min-height: 48px; white-space: normal; padding: 12px 16px; }
+  .form-control { min-height: 48px; }
+  textarea.form-control { min-height: 96px; resize: vertical; }
+  .custom-check-pill { min-height: 48px; }
+  .custom-check-pill input[type='checkbox'], .custom-check-pill input[type='radio'] { width: 20px; height: 20px; }
+  .form-grid-2, .form-grid-3 { gap: 8px; }
+  .review-card { padding: 16px; }
+  .review-header { gap: 12px; flex-wrap: wrap; }
+  .btn-edit-sec { min-height: 44px; padding: 8px 12px; }
+  .photo-upload-box > div { min-width: 0; max-width: 100%; }
+  .fixed-course-box { padding: 16px; }
+  .course-badge-pill { max-width: 100%; white-space: normal; }
+}
+@media screen and (hover: none) {
+  .btn-sidy:hover { transform: none; }
+}
+
+@media screen and (max-width: 400px) {
+  .stepper-step { flex-direction: column; min-width: 0; gap: 4px; font-size: 0.7rem; }
+  .stepper-container { align-items: center; }
+}
+

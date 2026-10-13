@@ -835,6 +835,8 @@ async function captureResumeCanvas() {
       windowWidth: 1024,
       onclone: (doc) => {
         const clonedPaper = doc.getElementById('resume-paper');
+        const footer = clonedPaper.querySelector('.resume-footer');
+        if (footer && !footer.textContent.trim()) footer.remove();
         clonedPaper.style.transform = 'none';
         const wrapper = clonedPaper.closest('.resume-wrapper');
         wrapper.style.overflow = 'visible';

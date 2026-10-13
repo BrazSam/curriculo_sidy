@@ -224,7 +224,7 @@
               <label for="f-nome">Nome Completo *</label>
               <input
                 type="text"
-                id="f-nome"
+                id="f-nome" autocomplete="name" enterkeyhint="next"
                 class="form-control"
                 placeholder="Ex: Carlos Eduardo de Oliveira"
                 required
@@ -235,7 +235,7 @@
 
             <div class="form-group">
               <label for="f-nasc">Data de Nascimento</label>
-              <input type="date" id="f-nasc" class="form-control" />
+              <input type="date" id="f-nasc" autocomplete="bday" class="form-control" />
             </div>
           </div>
 
@@ -244,7 +244,7 @@
               <label for="f-cidade">Cidade *</label>
               <input
                 type="text"
-                id="f-cidade"
+                id="f-cidade" autocomplete="address-level2" enterkeyhint="next"
                 class="form-control"
                 placeholder="Ex: Campinas"
                 required
@@ -255,7 +255,7 @@
 
             <div class="form-group">
               <label for="f-uf">Estado (UF) *</label>
-              <select id="f-uf" class="form-control" required onchange="validateField(this)">
+              <select id="f-uf" autocomplete="address-level1" class="form-control" required onchange="validateField(this)">
                 <option value="">Selecione o Estado...</option>
                 <option value="AC">Acre (AC)</option>
                 <option value="AL">Alagoas (AL)</option>
@@ -304,7 +304,7 @@
               <label for="f-telefone">Telefone / WhatsApp *</label>
               <input
                 type="tel"
-                id="f-telefone"
+                id="f-telefone" autocomplete="tel" inputmode="tel" enterkeyhint="next"
                 class="form-control"
                 placeholder="Ex: (11) 98675-4321"
                 required
@@ -317,7 +317,7 @@
               <label for="f-email">E-mail *</label>
               <input
                 type="email"
-                id="f-email"
+                id="f-email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" enterkeyhint="next"
                 class="form-control"
                 placeholder="carlos@exemplo.com"
                 required
@@ -911,7 +911,7 @@
           <div
             style="
               display: grid;
-              grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+              grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
               gap: 10px;
               margin-bottom: 16px;
             "
