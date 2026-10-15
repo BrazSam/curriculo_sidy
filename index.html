@@ -233,7 +233,7 @@
 
             <div class="form-group">
               <label for="f-nasc">Data de Nascimento</label>
-              <input type="date" id="f-nasc" autocomplete="bday" class="form-control" />
+              <input type="date" id="f-nasc" autocomplete="bday" class="form-control" onfocus="validateField(this)" onchange="validateField(this)" />
             </div>
           </div>
 
@@ -1369,6 +1369,12 @@
         >
       </div>
 
+      <div id="pdf-loading" class="pdf-loading" hidden>
+        <p>Gerando seu PDF. Aguarde um instante...</p>
+        <div class="pdf-loading-track" role="progressbar" aria-label="Gerando o PDF">
+          <span class="pdf-loading-fill"></span>
+        </div>
+      </div>
       <div class="pdf-tools">
         <button id="btn-retry-pdf" class="btn-sidy btn-sidy-outline" onclick="prepareResumePDF()" hidden>Tentar novamente</button>
         <a id="pdf-open" class="btn-sidy btn-sidy-outline" target="_blank" rel="noopener" hidden>Abrir PDF / Imprimir</a>

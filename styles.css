@@ -10,6 +10,19 @@
 .pdf-privacy { text-align: center; color: #64748b; font-size: 0.8rem; margin: 16px auto; max-width: 600px; }
 button:disabled { opacity: 0.6; cursor: wait; }
 
+/* A geração não informa porcentagem, então a barra indica que ainda está trabalhando. */
+.pdf-loading { width: 100%; max-width: 480px; margin: 24px auto; }
+.pdf-loading p { margin: 0 0 10px; text-align: center; color: #475569; font-size: 0.9rem; }
+.pdf-loading-track { height: 8px; overflow: hidden; border-radius: 999px; background: #dbeafe; }
+.pdf-loading-fill { display: block; width: 40%; height: 100%; border-radius: inherit; background: #1b6ec2; animation: pdf-loading 1.4s ease-in-out infinite; }
+@keyframes pdf-loading {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdf-loading-fill { animation: none; width: 100%; opacity: 0.6; }
+}
+
 /* Variáveis e estilos globais que complementam o Basecoat. */
 :root {
   color-scheme: light dark;
@@ -986,6 +999,10 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
   .btn-sidy svg, .form-card-title svg, .step-circle { flex-shrink: 0; }
 }
 @media screen and (max-width: 600px) {
+  /* Em telas pequenas, as etapas ficam com o nome abaixo do número. */
+  .stepper-container { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stepper-step { flex-direction: column; min-width: 0; }
+  .stepper-step .step-text { font-size: 0.68rem; }
   .screen-view { padding: 20px 12px 40px; }
   .screen-view .btn-sidy { width: 100%; min-height: 48px; white-space: normal; padding: 12px 16px; }
   .form-control { min-height: 48px; }

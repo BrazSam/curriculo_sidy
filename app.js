@@ -57,6 +57,7 @@ const MACHINE_ICONS = {
 // 2. INICIALIZAÇÃO — atualiza o ano do rodapé e a conclusão do curso
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('foot-year').textContent = new Date().getFullYear();
+  validateField(document.getElementById('f-nasc'));
   // Pré-preenche a conclusão do curso com o mês atual.
   const now = new Date();
   const fim = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -182,6 +183,11 @@ function setFieldError(input, message) {
 }
 
 function validateField(input, required = input.required) {
+  // Usa o dia do aparelho e atualiza o limite mesmo se a página ficou aberta de um dia para o outro.
+  if (input.id === 'f-nasc') {
+    const today = new Date();
+    input.max = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  }
   let message = '';
   const value = input.value.trim();
   if (!input.disabled) {
@@ -191,6 +197,8 @@ function validateField(input, required = input.required) {
       message = `Use no máximo ${input.maxLength} caracteres.`;
     } else if (input.id === 'f-telefone' && !/^\d{10,11}$/.test(value.replace(/\D/g, ''))) {
       message = 'Informe o telefone com DDD: 10 ou 11 dígitos.';
+    } else if (input.id === 'f-nasc' && input.validity.rangeOverflow) {
+      message = 'A data de nascimento não pode ser no futuro.';
     } else if (!input.validity.valid) {
       message =
         input.type === 'email'
@@ -353,6 +361,7 @@ function validateAndGoToReview() {
   if (!validateField(ufEl)) isValid = false;
   if (!validateField(telEl)) isValid = false;
   if (!validateField(emailEl)) isValid = false;
+  if (!validateField(document.getElementById('f-nasc'))) isValid = false;
 
   if (!isValid) {
     // Leva o foco ao primeiro campo inválido
@@ -827,6 +836,8 @@ async function prepareResumePDF() {
   resumeUrl = null;
   clearShareFallback();
   const status = document.getElementById('pdf-status');
+  const loading = document.getElementById('pdf-loading');
+  loading.hidden = false;
   const preview = document.getElementById('pdf-preview');
   const open = document.getElementById('pdf-open');
   const retry = document.getElementById('btn-retry-pdf');
@@ -864,6 +875,7 @@ async function prepareResumePDF() {
     open.hidden = false;
     buttons.forEach(button => { button.disabled = false; });
     status.textContent = '✓ PDF pronto para baixar e compartilhar!';
+    loading.hidden = true;
     clearTimeout(timeout);
     try {
       const { renderPDFPreview } = await import('./pdf-preview.js');
@@ -878,7 +890,11 @@ async function prepareResumePDF() {
     if (version !== resumeVersion) return;
     status.textContent = error.name === 'AbortError' ? 'A geração demorou mais que o esperado. Tente novamente.' : error.message;
     retry.hidden = false;
-  } finally { clearTimeout(timeout); }
+  } finally {
+    clearTimeout(timeout);
+    // Uma resposta antiga não deve esconder a barra de um pedido mais recente.
+    if (version === resumeVersion) loading.hidden = true;
+  }
 }
 
 function downloadResumePDF() {

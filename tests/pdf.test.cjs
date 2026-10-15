@@ -29,6 +29,30 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}`, { waitUntil: 'domcontentloaded' });
+    // Os nomes das etapas precisam caber também nos celulares mais estreitos.
+    await page.evaluate(() => document.fonts.ready);
+    for (const width of [320, 390, 768, 1366]) {
+      await page.setViewport({ width, height: 900 });
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    }
+    const birthChecks = await page.evaluate(() => {
+      const input = document.getElementById('f-nasc');
+      input.value = '2099-01-01';
+      const future = validateField(input);
+      const message = input.nextElementSibling.textContent;
+      input.value = input.max;
+      const today = validateField(input);
+      input.value = '1995-03-12';
+      const past = validateField(input);
+      input.value = '';
+      const empty = validateField(input);
+      return { future, message, today, past, empty };
+    });
+    assert.equal(birthChecks.future, false);
+    assert.match(birthChecks.message, /não pode ser no futuro/);
+    assert.equal(birthChecks.today, true);
+    assert.equal(birthChecks.past, true);
+    assert.equal(birthChecks.empty, true);
     // Portrait test image: a circle must remain circular after the square crop.
     const photo = await page.evaluate(() => {
       const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 800;
