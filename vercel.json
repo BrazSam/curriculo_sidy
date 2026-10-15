@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/resume.js": {
+      "maxDuration": 60,
+      "memory": 2048,
+      "includeFiles": "{index.html,app.js,styles.css,img/**,node_modules/@fontsource/**,node_modules/@sparticuz/chromium/bin/**}"
+    }
+  }
+}

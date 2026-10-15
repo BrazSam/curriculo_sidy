@@ -784,153 +784,136 @@ function generateResumeAndShow() {
   goToStep(4);
   fitResumeToPage();
   prepareResumeLayout();
+  if (!window.__PDF_SERVER__) prepareResumePDF();
 }
 
-// 12. IMPRESSÃO E COMPARTILHAMENTO
-let preparingResumePrint = false;
-async function printOrSavePDF() {
-  if (preparingResumePrint) return;
-  preparingResumePrint = true;
-  const button = document.querySelector('[onclick="printOrSavePDF()"]');
-  const originalLabel = button ? button.innerHTML : '';
-  if (button) { button.disabled = true; button.textContent = 'Preparando impressão...'; }
-  try {
-    const canvas = await captureResumeCanvas();
-    const image = new Image();
-    image.id = 'resume-print-image';
-    image.alt = 'Currículo completo';
-    image.src = canvas.toDataURL('image/png');
-    await image.decode();
-    document.getElementById('resume-print-image')?.remove();
-    document.body.append(image);
-    document.body.classList.add('resume-print-ready');
-    // Uma imagem é um elemento indivisível: o Safari não pagina os cartões internos.
-    window.print();
-  } catch (error) {
-    console.error(error);
-    alert('Não foi possível preparar a impressão. Tente novamente.');
-  } finally {
-    preparingResumePrint = false;
-    if (button) { button.disabled = false; button.innerHTML = originalLabel; }
-  }
+// 12. UM ÚNICO PDF PARA PRÉVIA, DOWNLOAD E COMPARTILHAMENTO
+let resumeFile = null;
+let resumeUrl = null;
+let resumeRequest = null;
+let resumeVersion = 0;
+
+async function compressResumePhoto(source) {
+  if (!source) return null;
+  const image = new Image();
+  image.src = source;
+  await image.decode();
+  // Crop a square, preserving proportions, before upload; no CSS screenshot is used.
+  const edge = Math.min(image.naturalWidth, image.naturalHeight);
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = Math.min(600, edge);
+  const context = canvas.getContext('2d');
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(image, (image.naturalWidth - edge) / 2, (image.naturalHeight - edge) / 2,
+    edge, edge, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', 0.88);
 }
-
-async function captureResumeCanvas() {
-  if (!window.html2canvas) throw new Error('Biblioteca de captura indisponível');
-  const paper = document.getElementById('resume-paper');
-    // Espera as fontes e captura em alta resolução.
-    await prepareResumeLayout();
-    const w = paper.offsetWidth;
-    const h = paper.offsetHeight;
-    let scale = 3;
-    const maxPixels = 14000000;
-    if (w * h * scale * scale > maxPixels) {
-      scale = Math.max(1.5, Math.sqrt(maxPixels / (w * h)));
-    }
-    return await window.html2canvas(paper, {
-      scale,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      windowWidth: 1024,
-      onclone: (doc) => {
-        const clonedPaper = doc.getElementById('resume-paper');
-        const footer = clonedPaper.querySelector('.resume-footer');
-        if (footer && !footer.textContent.trim()) footer.remove();
-        clonedPaper.style.transform = 'none';
-        const wrapper = clonedPaper.closest('.resume-wrapper');
-        wrapper.style.overflow = 'visible';
-        wrapper.style.width = '210mm';
-        wrapper.style.padding = '0';
-        const preview = clonedPaper.closest('.resume-preview');
-        preview.style.width = '210mm';
-        preview.style.height = '296mm';
-      },
-    });
-
-}
-
-let shareDownloadUrl = null;
 
 function clearShareFallback() {
   document.getElementById('share-fallback').hidden = true;
   document.getElementById('share-download').removeAttribute('href');
-  document.getElementById('share-download').removeAttribute('download');
   document.getElementById('share-whatsapp-link').removeAttribute('href');
-  if (shareDownloadUrl) URL.revokeObjectURL(shareDownloadUrl);
-  shareDownloadUrl = null;
 }
 
-// O link do WhatsApp aceita texto, mas não anexa arquivos locais.
-// Mantém o PDF disponível para download e orienta o envio manual.
-function showShareFallback(file) {
+async function prepareResumePDF() {
+  const version = ++resumeVersion;
+  resumeRequest?.abort();
+  const controller = new AbortController();
+  resumeRequest = controller;
+  const timeout = setTimeout(() => controller.abort(), 65000);
+  resumeFile = null;
+  if (resumeUrl) URL.revokeObjectURL(resumeUrl);
+  resumeUrl = null;
   clearShareFallback();
-  shareDownloadUrl = URL.createObjectURL(file);
+  const status = document.getElementById('pdf-status');
+  const preview = document.getElementById('pdf-preview');
+  const open = document.getElementById('pdf-open');
+  const retry = document.getElementById('btn-retry-pdf');
+  const buttons = [document.getElementById('btn-download-pdf'), document.getElementById('btn-share-whatsapp')];
+  buttons.forEach(button => { button.disabled = true; });
+  open.hidden = true;
+  open.removeAttribute('href');
+  retry.hidden = true;
+  preview.hidden = true;
+  preview.replaceChildren();
+  document.querySelector('#screen-share .resume-wrapper').hidden = true;
+  status.textContent = 'Preparando seu PDF...';
+  try {
+    const payload = JSON.parse(JSON.stringify(state));
+    payload.photoDataUrl = await compressResumePhoto(payload.photoDataUrl);
+    if (version !== resumeVersion) return;
+    const response = await fetch('/api/resume', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload), signal: controller.signal,
+    });
+    if (!response.ok) {
+      const message = await response.json().catch(() => ({}));
+      throw new Error(message.error || 'Não foi possível gerar o PDF. Tente novamente.');
+    }
+    if (!response.headers.get('content-type')?.includes('application/pdf')) {
+      throw new Error('O serviço de PDF não está disponível. Use o servidor do projeto ou a versão publicada.');
+    }
+    const blob = await response.blob();
+    if (version !== resumeVersion) return;
+    const filename = 'Curriculo_SIDY_' + (payload.nome.replace(/[^\p{L}\p{N}_-]+/gu, '_') || 'Aluno') + '.pdf';
+    resumeFile = new File([blob], filename, { type: 'application/pdf' });
+    resumeUrl = URL.createObjectURL(resumeFile);
+    open.href = resumeUrl;
+    open.hidden = false;
+    buttons.forEach(button => { button.disabled = false; });
+    status.textContent = '✓ PDF pronto para baixar e compartilhar!';
+    clearTimeout(timeout);
+    try {
+      const { renderPDFPreview } = await import('./pdf-preview.js');
+      const pages = await renderPDFPreview(await blob.arrayBuffer());
+      if (version !== resumeVersion) return;
+      preview.replaceChildren(...pages);
+      preview.hidden = false;
+    } catch {
+      if (version === resumeVersion) status.textContent = 'PDF pronto! Use “Abrir PDF” para visualizar o arquivo.';
+    }
+  } catch (error) {
+    if (version !== resumeVersion) return;
+    status.textContent = error.name === 'AbortError' ? 'A geração demorou mais que o esperado. Tente novamente.' : error.message;
+    retry.hidden = false;
+  } finally { clearTimeout(timeout); }
+}
+
+function printOrSavePDF() {
+  if (!resumeFile || !resumeUrl) return;
+  const link = document.createElement('a');
+  link.href = resumeUrl;
+  link.download = resumeFile.name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+}
+
+function showShareFallback() {
+  if (!resumeFile) return;
   const download = document.getElementById('share-download');
-  download.href = shareDownloadUrl;
-  download.download = file.name;
-  document.getElementById('share-whatsapp-link').href =
-    'https://api.whatsapp.com/send';
+  download.href = resumeUrl;
+  download.download = resumeFile.name;
+  document.getElementById('share-whatsapp-link').href = 'https://api.whatsapp.com/send';
   const panel = document.getElementById('share-fallback');
   panel.hidden = false;
   panel.focus();
 }
 
-// Envia o PDF pelo compartilhamento do celular, quando disponível.
 async function shareOnWhatsApp(button) {
-  const paper = document.getElementById('resume-paper');
-  const btn = button || document.getElementById('btn-share-whatsapp');
-  if (!paper || btn.disabled) return;
-  const originalContent = Array.from(btn.childNodes);
-  btn.textContent = 'Gerando PDF...';
-  btn.disabled = true;
+  if (!resumeFile || button.disabled) return;
   clearShareFallback();
-
-  const nomeArquivo = 'Curriculo_SIDY_' + (state.nome.replace(/\s+/g, '_') || 'Aluno') + '.pdf';
-
+  button.disabled = true;
+  const file = resumeFile;
   try {
-    const JSPDF = window.jspdf && window.jspdf.jsPDF;
-    if (!JSPDF || !window.html2canvas) {
-      alert(
-        'Não foi possível carregar a geração de PDF. Recarregue a página ou use “Salvar em PDF / Imprimir”.',
-      );
-      return;
-    }
-
-    const canvas = await captureResumeCanvas();
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new JSPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
-    const pageW = 210,
-      pageH = 297;
-    // Ajuste proporcional único: nunca corta o conteúdo nem adiciona páginas.
-    const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
-    const imgW = canvas.width * ratio;
-    const imgH = canvas.height * ratio;
-    pdf.addImage(imgData, 'PNG', (pageW - imgW) / 2, 0, imgW, imgH);
-    const file = new File([pdf.output('blob')], nomeArquivo, { type: 'application/pdf' });
-
-    try {
-      if (
-        typeof navigator.share === 'function' &&
-        typeof navigator.canShare === 'function' &&
-        navigator.canShare({ files: [file] })
-      ) {
-        await navigator.share({ files: [file] });
-        return;
-      }
-    } catch (err) {
-      // Cancelar é uma escolha do usuário; não abre outra janela nem baixa arquivos.
-      if (err && err.name === 'AbortError') return;
-    }
-    showShareFallback(file);
-  } catch (err) {
-    console.error(err);
-    alert('Não foi possível gerar o PDF. Use “Salvar em PDF / Imprimir” ou tente novamente.');
-  } finally {
-    // Restaura o botão após sucesso, cancelamento ou falha.
-    btn.replaceChildren(...originalContent);
-    btn.disabled = false;
-  }
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      // No asynchronous generation before this call: preserve the user's click activation.
+      await navigator.share({ files: [file] });
+    } else showShareFallback();
+  } catch (error) {
+    if (error.name !== 'AbortError' && file === resumeFile) showShareFallback();
+  } finally { button.disabled = !resumeFile; }
 }
 
 // Ajuda persistente e contadores dos campos com limite de texto.

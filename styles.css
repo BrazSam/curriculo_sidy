@@ -2,6 +2,14 @@
    Ordem: base e ajustes globais → componentes → currículo A4 → impressão.
    A ordem das regras foi preservada para manter o visual existente. */
 
+[hidden] { display: none !important; }
+.pdf-tools { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.pdf-preview { margin: 20px auto; padding: 12px; background: #525659; border-radius: 12px; max-width: 820px; }
+.pdf-preview canvas { display: block; width: 100%; height: auto; background: white; }
+.pdf-preview canvas + canvas { margin-top: 12px; }
+.pdf-privacy { text-align: center; color: #64748b; font-size: 0.8rem; margin: 16px auto; max-width: 600px; }
+button:disabled { opacity: 0.6; cursor: wait; }
+
 /* Variáveis e estilos globais que complementam o Basecoat. */
 :root {
   color-scheme: light dark;

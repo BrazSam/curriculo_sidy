@@ -17,9 +17,7 @@
     <!-- Aparência da aplicação e do currículo -->
     <link rel="stylesheet" href="styles.css" />
 
-    <!-- Bibliotecas de geração do PDF: preservar os arquivos e as licenças -->
-    <script src="vendor/html2canvas-1.4.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   </head>
   <body>
     <!-- Cabeçalho fixo -->
@@ -1273,10 +1271,10 @@
             gap: 6px;
           "
         >
-          ✓ Currículo gerado com sucesso!
+          <span id="pdf-status" role="status" aria-live="polite">Preparando seu PDF...</span>
         </span>
         <h2 style="font-size: 1.7rem; color: var(--sidy-navy); margin: 8px 0 4px"
-          >Seu currículo está pronto para envio</h2
+          >Seu currículo em PDF</h2
         >
         <p style="color: #64748b; font-size: 0.92rem; margin: 0 auto; max-width: 550px">
           Baixe o documento em PDF, imprima ou compartilhe diretamente no WhatsApp para as vagas de
@@ -1309,7 +1307,7 @@
           "
         >
           <!-- Impressão ou PDF pelo navegador -->
-          <button type="button" class="btn-sidy btn-sidy-primary" onclick="printOrSavePDF()">
+          <button type="button" class="btn-sidy btn-sidy-primary" id="btn-download-pdf" onclick="printOrSavePDF()" disabled>
             <svg
               width="18"
               height="18"
@@ -1323,14 +1321,14 @@
               />
               <rect x="6" y="14" width="12" height="8" />
             </svg>
-            Salvar em PDF / Imprimir
+            Baixar PDF
           </button>
 
           <!-- Compartilhamento do PDF -->
           <button
             type="button"
             class="btn-sidy btn-sidy-green"
-            id="btn-share-whatsapp"
+            id="btn-share-whatsapp" disabled
             onclick="shareOnWhatsApp(this)"
           >
             <svg
@@ -1374,6 +1372,12 @@
         >
       </div>
 
+      <div class="pdf-tools">
+        <button id="btn-retry-pdf" class="btn-sidy btn-sidy-outline" onclick="prepareResumePDF()" hidden>Tentar novamente</button>
+        <a id="pdf-open" class="btn-sidy btn-sidy-outline" target="_blank" rel="noopener" hidden>Abrir PDF / Imprimir</a>
+      </div>
+      <div id="pdf-preview" class="pdf-preview" aria-label="Prévia do arquivo PDF" hidden></div>
+      <p class="pdf-privacy">Seus dados e sua foto são enviados ao servidor apenas para gerar o PDF, sem salvar o currículo.</p>
       <!-- PRÉVIA DO CURRÍCULO — formato A4 -->
       <div class="resume-wrapper">
         <div class="resume-preview">
