@@ -1,6 +1,6 @@
 /* GERADOR DE CURRÍCULO SIDY
  * Fluxo: formulário → validateAndGoToReview() → renderReview()
- *        → generateResumeAndShow() → impressão ou compartilhamento.
+ *        → generateResumeAndShow() → PDF pronto para baixar ou compartilhar.
  * state concentra os dados. Os IDs do HTML são usados para localizar os campos.
  * Este arquivo é carregado ao final do HTML, quando os elementos já existem.
  */
@@ -663,10 +663,8 @@ function renderReview() {
   }
 }
 
-// 11. CURRÍCULO A4 — preenche a prévia final
+// 11. MODELO DO CURRÍCULO — o servidor usa este HTML para montar o PDF
 function generateResumeAndShow() {
-  document.getElementById('resume-print-image')?.remove();
-  document.body.classList.remove('resume-print-ready');
   clearShareFallback();
   // Nome do candidato
   document.getElementById('res-name').textContent = state.nome.toUpperCase();
@@ -791,6 +789,7 @@ function generateResumeAndShow() {
 let resumeFile = null;
 let resumeUrl = null;
 let resumeRequest = null;
+// Se gerar de novo, uma resposta antiga não pode substituir o currículo novo.
 let resumeVersion = 0;
 
 async function compressResumePhoto(source) {
@@ -798,7 +797,7 @@ async function compressResumePhoto(source) {
   const image = new Image();
   image.src = source;
   await image.decode();
-  // Crop a square, preserving proportions, before upload; no CSS screenshot is used.
+  // Recorta o centro da foto sem esticar e deixa o envio mais leve.
   const edge = Math.min(image.naturalWidth, image.naturalHeight);
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = Math.min(600, edge);
@@ -817,6 +816,7 @@ function clearShareFallback() {
 }
 
 async function prepareResumePDF() {
+  // Cancela o pedido anterior e limpa o arquivo que estava na tela.
   const version = ++resumeVersion;
   resumeRequest?.abort();
   const controller = new AbortController();
@@ -854,6 +854,7 @@ async function prepareResumePDF() {
     if (!response.headers.get('content-type')?.includes('application/pdf')) {
       throw new Error('O serviço de PDF não está disponível. Use o servidor do projeto ou a versão publicada.');
     }
+    // Este mesmo arquivo vai para a prévia, o download e o WhatsApp.
     const blob = await response.blob();
     if (version !== resumeVersion) return;
     const filename = 'Curriculo_SIDY_' + (payload.nome.replace(/[^\p{L}\p{N}_-]+/gu, '_') || 'Aluno') + '.pdf';
@@ -880,7 +881,7 @@ async function prepareResumePDF() {
   } finally { clearTimeout(timeout); }
 }
 
-function printOrSavePDF() {
+function downloadResumePDF() {
   if (!resumeFile || !resumeUrl) return;
   const link = document.createElement('a');
   link.href = resumeUrl;
@@ -908,7 +909,7 @@ async function shareOnWhatsApp(button) {
   const file = resumeFile;
   try {
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      // No asynchronous generation before this call: preserve the user's click activation.
+      // O arquivo já está pronto. Assim o celular abre o compartilhamento no clique.
       await navigator.share({ files: [file] });
     } else showShareFallback();
   } catch (error) {

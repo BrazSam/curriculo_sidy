@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+// Monta a pasta dist, que é a versão servida no navegador e publicada na Vercel.
 fs.mkdirSync('dist/vendor/pdfjs', { recursive: true });
 for (const file of ['index.html', 'app.js', 'styles.css', 'pdf-preview.js']) {
   fs.copyFileSync(file, path.join('dist', file));

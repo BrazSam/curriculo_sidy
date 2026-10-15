@@ -2,8 +2,14 @@ import { getDocument, GlobalWorkerOptions } from './vendor/pdfjs/pdf.mjs';
 GlobalWorkerOptions.workerSrc = './vendor/pdfjs/pdf.worker.mjs';
 
 export async function renderPDFPreview(data) {
-  const task = getDocument({ data, cMapUrl: '/vendor/pdfjs/cmaps/', cMapPacked: true,
-    standardFontDataUrl: '/vendor/pdfjs/standard_fonts/', wasmUrl: '/vendor/pdfjs/wasm/' });
+  // Mostra o PDF que veio do servidor. Aqui não criamos outro documento.
+  const task = getDocument({
+    data,
+    cMapUrl: '/vendor/pdfjs/cmaps/',
+    cMapPacked: true,
+    standardFontDataUrl: '/vendor/pdfjs/standard_fonts/',
+    wasmUrl: '/vendor/pdfjs/wasm/',
+  });
   const pdf = await task.promise;
   const pages = [];
   try {
@@ -19,5 +25,7 @@ export async function renderPDFPreview(data) {
       pages.push(canvas);
     }
     return pages;
-  } finally { await task.destroy(); }
+  } finally {
+    await task.destroy();
+  }
 }

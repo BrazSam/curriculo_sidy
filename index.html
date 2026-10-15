@@ -1306,8 +1306,8 @@
             margin-top: 18px;
           "
         >
-          <!-- Impressão ou PDF pelo navegador -->
-          <button type="button" class="btn-sidy btn-sidy-primary" id="btn-download-pdf" onclick="printOrSavePDF()" disabled>
+          <!-- Baixa o mesmo arquivo que aparece na prévia -->
+          <button type="button" class="btn-sidy btn-sidy-primary" id="btn-download-pdf" onclick="downloadResumePDF()" disabled>
             <svg
               width="18"
               height="18"
@@ -1348,10 +1348,7 @@
         </div>
       </div>
 
-      <!-- Alternativa ao envio direto: começa oculta e aparece por showShareFallback().
-         Os links recebem o PDF e a mensagem pelo JavaScript.
-         no-print: não aparece no currículo impresso.
-         role="status": anuncia a orientação; tabindex="-1": permite focar o aviso. -->
+      <!-- Se o celular não compartilhar o arquivo, mostramos como baixar e anexar. -->
       <div id="share-fallback" class="no-print form-card" role="status" tabindex="-1" hidden>
         <p
           >Não foi possível enviar o arquivo diretamente. Baixe o PDF e anexe-o na conversa do
@@ -1378,7 +1375,7 @@
       </div>
       <div id="pdf-preview" class="pdf-preview" aria-label="Prévia do arquivo PDF" hidden></div>
       <p class="pdf-privacy">Seus dados e sua foto são enviados ao servidor apenas para gerar o PDF, sem salvar o currículo.</p>
-      <!-- PRÉVIA DO CURRÍCULO — formato A4 -->
+      <!-- Modelo A4 usado pelo servidor. A prévia visível fica em #pdf-preview. -->
       <div class="resume-wrapper">
         <div class="resume-preview">
         <div id="resume-paper">

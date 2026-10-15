@@ -4,6 +4,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const fields = ['nome', 'nascimento', 'cidade', 'uf', 'bairro', 'telefone', 'email', 'cnh', 'cursoInicio', 'cursoFim', 'outrasInfo'];
 
+// Confere os dados antes de abrir o navegador para gerar o arquivo.
 function validate(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Dados inválidos.');
   const text = (value, max = 600) => {
@@ -40,6 +41,7 @@ function validate(input) {
 async function renderPDF(data) {
   const { default: puppeteer } = await import('puppeteer-core');
   const { default: chromium } = await import('@sparticuz/chromium');
+  // No PC usamos o Chrome instalado. Na Vercel usamos o Chromium do projeto.
   const localExecutable = process.env.CHROME_EXECUTABLE_PATH || (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : null);
   const browser = await puppeteer.launch({
     executablePath: localExecutable || await chromium.executablePath(),
@@ -50,7 +52,7 @@ async function renderPDF(data) {
     const page = await browser.newPage();
     await page.setViewport({ width: 1024, height: 1400, deviceScaleFactor: 1 });
     page.setDefaultTimeout(25000);
-    // Only bundled assets are allowed. Candidate data cannot trigger network requests.
+    // Só carrega imagens do projeto. Nenhum endereço externo entra no currículo.
     await page.setRequestInterception(true);
     page.on('request', async request => {
       try {
@@ -61,11 +63,13 @@ async function renderPDF(data) {
         await request.respond({ contentType: 'image/png', body: await fs.readFile(path.join(root, filename)) });
       } catch { if (!request.isInterceptResolutionHandled()) await request.abort(); }
     });
+    // Reaproveita o modelo do site, sem carregar scripts e fontes da internet.
     let html = await fs.readFile(path.join(root, 'index.html'), 'utf8');
     html = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<link\b[^>]*>/gi, '');
     html = html.replace('<head>', '<head><base href="https://resume.local/">');
     await page.setContent(html, { waitUntil: 'load' });
     await page.addStyleTag({ content: await fs.readFile(path.join(root, 'styles.css'), 'utf8') });
+    // As fontes vão junto no arquivo para manter a aparência em qualquer aparelho.
     let fonts = '';
     for (const [family, weights] of [['inter', [400, 500, 600, 700]], ['poppins', [600, 700, 800]]]) {
       for (const weight of weights) {
@@ -90,7 +94,7 @@ async function renderPDF(data) {
     await page.evaluate(async payload => {
       Object.assign(state, payload);
       generateResumeAndShow();
-      // Use text labels instead of platform-dependent emoji fonts in the document.
+      // Usa texto nos contatos para não depender dos emojis de cada sistema.
       const row = document.getElementById('res-contacts-row');
       row.textContent = row.textContent.replace(/📍/gu, '').replace(/📱/gu, 'Tel:').replace(/✉/gu, 'E-mail:').replace(/🪪/gu, '').replace(/🎂/gu, '');
       await document.fonts.ready;
@@ -99,16 +103,23 @@ async function renderPDF(data) {
       const scale = Number(document.getElementById('resume-paper').style.getPropertyValue('--resume-fit'));
       if (scale < 0.65) throw new Error('RESUME_TOO_LONG');
     }, data);
-    // Screen media avoids the legacy browser-print rules. The PDF has its own fixed A4 page.
+    // O PDF tem seu próprio A4 fixo, sem os ajustes da impressão direta do site.
     await page.emulateMediaType('screen');
     return Buffer.from(await page.pdf({ format: 'A4', printBackground: true, preferCSSPageSize: true, margin: { top: 0, bottom: 0, left: 0, right: 0 }, timeout: 25000 }));
-  } finally { await browser.close(); }
+  } finally {
+    // Fecha o navegador mesmo se a geração falhar.
+    await browser.close();
+  }
 }
 
+// Recebe o pedido da tela 4 e devolve o PDF, sem salvar os dados do candidato.
 async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ error: 'Use POST.' }); }
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Use POST.' });
+  }
   let data;
   try {
     const raw = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);

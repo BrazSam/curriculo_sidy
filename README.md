@@ -16,6 +16,18 @@ Crie seu currículo de operador de máquinas pesadas com o modelo da **SIDY Esco
 
 ## Desenvolvimento e PDF
 
+### Onde mexer
+
+- `index.html`: telas, campos e modelo do currículo.
+- `styles.css`: cores, espaçamentos e ajustes para celular.
+- `app.js`: formulário, revisão, pedido do PDF e compartilhamento.
+- `api/resume.js`: geração do PDF com Chromium no servidor.
+- `pdf-preview.js`: mostra o PDF pronto na tela 4.
+- `scripts/`: preparação dos arquivos e servidor local.
+- `tests/`: verificações do PDF e dos botões.
+
+Edite os arquivos da raiz. A pasta `dist` é gerada automaticamente pelo build.
+
 Requisitos: Node.js 22.17+ (ou 24+) e Google Chrome instalado para desenvolvimento.
 
 ```sh
