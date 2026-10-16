@@ -1040,7 +1040,7 @@ async function prepareResumePDF() {
     open.href = resumeUrl;
     open.hidden = false;
     buttons.forEach(button => { button.disabled = false; });
-    status.textContent = '✓ PDF pronto para baixar e compartilhar!';
+    status.textContent = '✓ PDF pronto para salvar e compartilhar!';
     loading.hidden = true;
     clearTimeout(timeout);
     try {
@@ -1050,7 +1050,7 @@ async function prepareResumePDF() {
       preview.replaceChildren(...pages);
       preview.hidden = false;
     } catch {
-      if (version === resumeVersion) status.textContent = 'PDF pronto! Use “Abrir PDF” para visualizar o arquivo.';
+      if (version === resumeVersion) status.textContent = 'PDF pronto! Use o link abaixo para abrir o arquivo.';
     }
   } catch (error) {
     if (version !== resumeVersion) return;
@@ -1092,7 +1092,7 @@ async function downloadResumePDF() {
   document.body.append(link);
   link.click();
   link.remove();
-  if (file === resumeFile) status.textContent = 'Download solicitado. Se o navegador abrir o PDF, use Salvar ou Imprimir. Você também pode usar “Abrir PDF / Imprimir”.';
+  if (file === resumeFile) status.textContent = 'Salvamento solicitado. Se o PDF abrir em outra tela, use o menu do navegador para salvar.';
 }
 
 function showShareFallback() {

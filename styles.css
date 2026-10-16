@@ -17,6 +17,10 @@ html { scroll-padding-top: var(--header-offset, 110px); }
 .formacao-block { background: #f8fafc; border: 1.5px solid var(--sidy-border); border-radius: 10px; padding: 18px; margin-bottom: 12px; }
 .formation-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
 .pdf-tools { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.pdf-save-help { margin: 12px auto 0; max-width: 440px; color: #64748b; font-size: 0.8rem; line-height: 1.5; }
+.pdf-print-link { display: flex; align-items: center; justify-content: center; width: fit-content; max-width: 100%; min-height: 44px; margin: 0 auto; padding: 8px 12px; color: var(--sidy-blue); font-size: 0.875rem; text-align: center; text-decoration: underline; text-underline-offset: 3px; }
+.pdf-print-link:hover { color: var(--sidy-navy); }
+.pdf-print-link:focus-visible { outline: 2px solid var(--sidy-blue); outline-offset: 2px; border-radius: 4px; }
 .pdf-preview { margin: 20px auto; padding: 12px; background: #525659; border-radius: 12px; max-width: 820px; }
 .pdf-preview canvas { display: block; width: 100%; height: auto; background: white; }
 .pdf-preview canvas + canvas { margin-top: 12px; }

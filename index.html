@@ -1317,11 +1317,12 @@
               stroke-width="2"
             >
               <path
-                d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+                d="M12 3v12m-5-5 5 5 5-5M5 16v5h14v-5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
               />
-              <rect x="6" y="14" width="12" height="8" />
             </svg>
-            Baixar PDF
+            Salvar PDF
           </button>
 
           <!-- Compartilhamento do PDF -->
@@ -1346,6 +1347,7 @@
             Enviar no WhatsApp
           </button>
         </div>
+        <p class="pdf-save-help">Se o PDF abrir em outra tela, use o menu do navegador para salvar.</p>
       </div>
 
       <!-- Se o celular não compartilhar o arquivo, mostramos como baixar e anexar. -->
@@ -1355,7 +1357,7 @@
           WhatsApp.</p
         >
         <div style="display: flex; gap: 12px; flex-wrap: wrap">
-          <a id="share-download" class="btn-sidy btn-sidy-primary">Baixar PDF</a>
+          <a id="share-download" class="btn-sidy btn-sidy-primary">Salvar PDF</a>
           <a
             id="share-whatsapp-link"
             class="btn-sidy btn-sidy-green"
@@ -1377,9 +1379,9 @@
       </div>
       <div class="pdf-tools">
         <button id="btn-retry-pdf" class="btn-sidy btn-sidy-outline" onclick="prepareResumePDF()" hidden>Tentar novamente</button>
-        <a id="pdf-open" class="btn-sidy btn-sidy-outline" target="_blank" rel="noopener" hidden>Abrir PDF / Imprimir</a>
       </div>
       <div id="pdf-preview" class="pdf-preview" aria-label="Prévia do arquivo PDF" hidden></div>
+      <a id="pdf-open" class="pdf-print-link no-print" target="_blank" rel="noopener" hidden>Abrir PDF para imprimir</a>
       <p class="pdf-privacy">Seus dados e sua foto são enviados ao servidor apenas para gerar o PDF, sem salvar o currículo.</p>
       <!-- Modelo A4 usado pelo servidor. A prévia visível fica em #pdf-preview. -->
       <div class="resume-wrapper">
