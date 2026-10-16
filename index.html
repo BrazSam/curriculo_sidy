@@ -222,7 +222,7 @@
               <label for="f-nome">Nome Completo *</label>
               <input
                 type="text"
-                id="f-nome" autocomplete="name" enterkeyhint="next"
+                id="f-nome" maxlength="100" autocomplete="name" enterkeyhint="next"
                 class="form-control"
                 placeholder="Ex: Carlos Eduardo de Oliveira"
                 required
@@ -233,7 +233,7 @@
 
             <div class="form-group">
               <label for="f-nasc">Data de Nascimento</label>
-              <input type="date" id="f-nasc" autocomplete="bday" class="form-control" onfocus="validateField(this)" onchange="validateField(this)" />
+              <input type="text" id="f-nasc" autocomplete="bday" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" class="form-control" oninput="maskBirthDate(this)" onblur="validateField(this)" />
             </div>
           </div>
 
@@ -242,7 +242,7 @@
               <label for="f-cidade">Cidade *</label>
               <input
                 type="text"
-                id="f-cidade" autocomplete="address-level2" enterkeyhint="next"
+                id="f-cidade" maxlength="80" autocomplete="address-level2" enterkeyhint="next"
                 class="form-control"
                 placeholder="Ex: Campinas"
                 required
@@ -290,7 +290,7 @@
               <label for="f-bairro">Bairro (Opcional)</label>
               <input
                 type="text"
-                id="f-bairro"
+                id="f-bairro" maxlength="80"
                 class="form-control"
                 placeholder="Ex: Jardim Santana"
               />
@@ -302,7 +302,7 @@
               <label for="f-telefone">Telefone / WhatsApp *</label>
               <input
                 type="tel"
-                id="f-telefone" autocomplete="tel" inputmode="tel" enterkeyhint="next"
+                id="f-telefone" maxlength="16" autocomplete="tel" inputmode="tel" enterkeyhint="next"
                 class="form-control"
                 placeholder="Ex: (11) 98675-4321"
                 required
@@ -315,7 +315,7 @@
               <label for="f-email">E-mail *</label>
               <input
                 type="email"
-                id="f-email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" enterkeyhint="next"
+                id="f-email" maxlength="254" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" enterkeyhint="next"
                 class="form-control"
                 placeholder="carlos@exemplo.com"
                 required
@@ -359,24 +359,24 @@
             </h3>
           </div>
 
-          <div class="fixed-course-box">
-            <div>
-              <div style="font-size: 1.1rem; font-weight: 800; font-family: 'Poppins', sans-serif"
-                >Curso de Operador de Máquinas Pesadas</div
-              >
-              <div style="font-size: 0.85rem; opacity: 0.9"
-                >SIDY Escola de Profissões · Qualificação Técnica Profissional</div
-              >
-            </div>
+          <label class="fixed-course-box machine-course-toggle">
+            <input type="checkbox" id="include-machine-course" checked onchange="toggleMachineCourse(this.checked)" aria-label="Incluir curso de Máquinas Pesadas no currículo" aria-controls="machine-course-fields" />
+            <span class="machine-course-copy">
+              <strong>Curso de Operador de Máquinas Pesadas</strong>
+              <small>SIDY Escola de Profissões · Qualificação Técnica Profissional</small>
+              <small class="machine-course-hint">Marque para incluir este curso no currículo.</small>
+            </span>
             <span class="course-badge-pill">Carga Horária: 66 Horas</span>
-          </div>
+          </label>
 
           <!-- Mês/Ano de Conclusão: largura total -->
+          <div id="machine-course-fields">
           <div class="form-group">
             <label for="f-curso-fim">Mês/Ano de Conclusão</label>
             <input type="month" id="f-curso-fim" class="form-control" />
           </div>
 
+          </div>
           <!-- Outra Formação: largura total, logo abaixo -->
           <div class="form-card-header">
             <h3 class="form-card-title">Outra Formação</h3>
@@ -393,12 +393,13 @@
             >
           </div>
 
-          <p class="formation-help" id="outra-formacao-help">Informe outro curso que você concluiu além do curso SIDY acima, como informática, curso técnico ou graduação. Se não tiver outra formação, deixe em branco.</p>
+          <p class="formation-help" id="outra-formacao-help">Informe outro curso que você concluiu além do curso SIDY acima, como informática, curso técnico ou graduação. Adicionar formação é opcional. Ao adicionar, preencha todos os campos ou clique em Remover formação.</p>
 
-          <div class="formacao-block" id="formacao-block-0">
+          <div class="formacao-block" id="formacao-block-0" hidden>
+            <div class="formation-actions"><strong>Formação adicional</strong><button type="button" class="btn-edit-sec" onclick="removeFormation(0)">Remover formação</button></div>
             <div class="form-grid-2">
               <div class="form-group">
-                <label for="formacao-curso-0">Nome do Curso</label>
+                <label for="formacao-curso-0">Nome do Curso *</label>
                 <input
                   type="text"
                   class="form-control formacao-curso"
@@ -407,7 +408,7 @@
                 <div class="field-guidance"><small class="character-count" id="formacao-curso-0-count">0 de 40 caracteres</small></div>
               </div>
               <div class="form-group">
-                <label for="formacao-instituicao-0">Instituição</label>
+                <label for="formacao-instituicao-0">Instituição *</label>
                 <input
                   type="text"
                   class="form-control formacao-instituicao"
@@ -417,8 +418,7 @@
               </div>
             </div>
             <div class="form-group" style="margin-bottom: 0; max-width: 180px">
-              <label>Ano de Conclusão</label>
-              <input
+              <label for="formacao-ano-0">Ano de Conclusão *</label><input id="formacao-ano-0" pattern="[1-9][0-9]{3}" aria-describedby="outra-formacao-help"
                 type="text"
                 class="form-control formacao-ano"
                 placeholder="Ex: 2023"
@@ -431,8 +431,8 @@
           <div
             class="formacao-block"
             id="formacao-block-1"
+            hidden
             style="
-              display: none;
               background: #f8fafc;
               border: 1.5px solid var(--sidy-border);
               border-radius: 10px;
@@ -447,10 +447,10 @@
                 align-items: center;
                 margin-bottom: 12px;
               "
-            ></div>
+            ><strong>Formação adicional</strong><button type="button" class="btn-edit-sec" onclick="removeFormation(1)">Remover formação</button></div>
             <div class="form-grid-2">
               <div class="form-group">
-                <label for="formacao-curso-1">Nome do Curso</label>
+                <label for="formacao-curso-1">Nome do Curso *</label>
                 <input
                   type="text"
                   class="form-control formacao-curso"
@@ -459,7 +459,7 @@
                 <div class="field-guidance"><small class="character-count" id="formacao-curso-1-count">0 de 40 caracteres</small></div>
               </div>
               <div class="form-group">
-                <label for="formacao-instituicao-1">Instituição</label>
+                <label for="formacao-instituicao-1">Instituição *</label>
                 <input
                   type="text"
                   class="form-control formacao-instituicao"
@@ -469,8 +469,7 @@
               </div>
             </div>
             <div class="form-group" style="margin-bottom: 0; max-width: 180px">
-              <label>Ano de Conclusão</label>
-              <input
+              <label for="formacao-ano-1">Ano de Conclusão *</label><input id="formacao-ano-1" pattern="[1-9][0-9]{3}" aria-describedby="outra-formacao-help"
                 type="text"
                 class="form-control formacao-ano"
                 placeholder="Ex: 2022"
@@ -479,6 +478,7 @@
               />
             </div>
           </div>
+          <button type="button" id="btn-add-formacao" class="btn-sidy btn-sidy-outline" style="width: 100%; border-style: dashed; padding: 10px" onclick="addFormation()">+ ADICIONAR FORMAÇÃO (OPCIONAL · MÁXIMO 2)</button>
         </section>
 
         <!-- MÁQUINAS OPERADAS -->
@@ -1096,7 +1096,7 @@
             >✏ Editar</button
           >
         </div>
-        <div>
+        <div id="rev-machine-course">
           <div style="font-weight: 700; color: #0f172a"
             >Curso de Operador de Máquinas Pesadas (66 Horas)</div
           >
@@ -1419,7 +1419,7 @@
           <!-- Conteúdo do currículo -->
           <div class="resume-body">
             <!-- Seção Formação -->
-            <div>
+            <div id="res-machine-course">
               <div class="resume-section-title">Formação Técnica &amp; Qualificação</div>
               <div class="resume-item">
                 <div class="resume-item-header">

@@ -16,7 +16,15 @@ function validate(input) {
     if (!Array.isArray(value) || value.length > 20) throw new Error('Lista de informações inválida.');
     return value.map(convert);
   };
-  const data = Object.fromEntries(fields.map(key => [key, text(input[key])]));
+  const limits = { nome: 100, nascimento: 10, cidade: 80, uf: 2, bairro: 80, telefone: 16, email: 254, cnh: 10, cursoInicio: 7, cursoFim: 7, outrasInfo: 60 };
+  const data = Object.fromEntries(fields.map(key => [key, text(input[key], limits[key])]));
+  if (data.nascimento) {
+    const date = new Date(data.nascimento + 'T12:00:00Z');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data.nascimento) || Number.isNaN(date.getTime()) ||
+      date.toISOString().slice(0, 10) !== data.nascimento || data.nascimento > new Date().toISOString().slice(0, 10)) {
+      throw new Error('Informe uma data de nascimento válida, que não esteja no futuro.');
+    }
+  }
   if (!data.nome.trim()) throw new Error('Informe o nome do candidato.');
   data.photoDataUrl = input.photoDataUrl || null;
   if (data.photoDataUrl && (typeof data.photoDataUrl !== 'string' || data.photoDataUrl.length > 1800000 ||
@@ -24,16 +32,20 @@ function validate(input) {
     throw new Error('Envie uma foto válida em JPG, PNG ou WebP.');
   }
   data.isPremium = input.isPremium === true;
+  data.includeMachineCourse = input.includeMachineCourse !== false;
   data.hasExperience = input.hasExperience === true;
   data.maquinas = list(input.maquinas, value => text(value, 120));
   data.adicionais = list(input.adicionais, value => text(value, 250));
   data.experiencias = list(input.experiencias, item => {
     if (!item || typeof item !== 'object') throw new Error('Experiência inválida.');
-    return { ...Object.fromEntries(['empresa', 'cargo', 'inicio', 'fim', 'atividades'].map(key => [key, text(item[key])])), atual: item.atual === true };
+    const limits = { empresa: 40, cargo: 30, inicio: 7, fim: 7, atividades: 80 };
+    return { ...Object.fromEntries(Object.keys(limits).map(key => [key, text(item[key], limits[key])])), atual: item.atual === true };
   });
   data.outrasFormacoes = list(input.outrasFormacoes, item => {
     if (!item || typeof item !== 'object') throw new Error('Formação inválida.');
-    return Object.fromEntries(['curso', 'instituicao', 'ano'].map(key => [key, text(item[key], 250)]));
+    const formation = Object.fromEntries(['curso', 'instituicao', 'ano'].map(key => [key, text(item[key], key === 'ano' ? 4 : 40)]));
+    if (!formation.curso.trim() || !formation.instituicao.trim() || !/^[1-9]\d{3}$/.test(formation.ano) || Number(formation.ano) > new Date().getFullYear()) throw new Error('Preencha curso, instituição e um ano de conclusão válido.');
+    return formation;
   });
   return data;
 }
@@ -94,14 +106,10 @@ async function renderPDF(data) {
     await page.evaluate(async payload => {
       Object.assign(state, payload);
       generateResumeAndShow();
-      // Usa texto nos contatos para não depender dos emojis de cada sistema.
-      const row = document.getElementById('res-contacts-row');
-      row.textContent = row.textContent.replace(/📍/gu, '').replace(/📱/gu, 'Tel:').replace(/✉/gu, 'E-mail:').replace(/🪪/gu, '').replace(/🎂/gu, '');
+      // Preserva os SVGs vetoriais criados por renderContacts no cabeçalho.
       await document.fonts.ready;
       await Promise.all(Array.from(document.querySelectorAll('#resume-paper img')).filter(img => img.getAttribute('src')).map(img => img.decode()));
-      fitResumeToPage();
-      const scale = Number(document.getElementById('resume-paper').style.getPropertyValue('--resume-fit'));
-      if (scale < 0.65) throw new Error('RESUME_TOO_LONG');
+      if (!fitResumeToPage()) throw new Error('RESUME_TOO_LONG');
     }, data);
     // O PDF tem seu próprio A4 fixo, sem os ajustes da impressão direta do site.
     await page.emulateMediaType('screen');

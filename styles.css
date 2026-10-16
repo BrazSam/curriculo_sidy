@@ -3,6 +3,19 @@
    A ordem das regras foi preservada para manter o visual existente. */
 
 [hidden] { display: none !important; }
+.contact-item svg { display: inline-block; vertical-align: -3px; margin-right: 5px; flex-shrink: 0; }
+.fixed-course-box.machine-course-toggle { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; cursor: pointer; }
+.machine-course-toggle input { width: 24px; height: 24px; flex-shrink: 0; accent-color: white; cursor: pointer; }
+.machine-course-copy { flex: 1; min-width: 180px; }
+.machine-course-copy strong { font: 800 1.05rem 'Poppins', sans-serif; }
+.machine-course-toggle strong, .machine-course-toggle small { display: block; }
+.machine-course-toggle small { margin-top: 4px; font-size: .82rem; opacity: .9; }
+.machine-course-toggle .machine-course-hint { font-size: .75rem; }
+.fixed-course-box.machine-course-toggle:has(input:not(:checked)) { background: #e2e8f0; color: #475569; }
+.machine-course-toggle:focus-within { outline: 3px solid #fbbf24; outline-offset: 3px; }
+html { scroll-padding-top: var(--header-offset, 110px); }
+.formacao-block { background: #f8fafc; border: 1.5px solid var(--sidy-border); border-radius: 10px; padding: 18px; margin-bottom: 12px; }
+.formation-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
 .pdf-tools { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
 .pdf-preview { margin: 20px auto; padding: 12px; background: #525659; border-radius: 12px; max-width: 820px; }
 .pdf-preview canvas { display: block; width: 100%; height: auto; background: white; }
@@ -913,9 +926,9 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
 }
 .resume-content {
   position: absolute; top: 0; left: 0;
-  width: 210mm; min-height: 296mm; display: flex; flex-direction: column;
+  width: 100%; min-height: 0; display: flex; flex-direction: column;
   transform-origin: top left;
-  transform: translateX(var(--resume-left, 0px)) scale(var(--resume-fit, 1));
+  transform: none;
 }
 .resume-content .resume-header { padding: 22px 28px; gap: 20px; }
 .resume-content .resume-body { padding: 20px 28px; gap: 14px; }
@@ -1026,3 +1039,22 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
   .stepper-container { align-items: center; }
 }
 
+/* Ajuste em uma página: a largura do cabeçalho nunca é reduzida. */
+.resume-content .resume-header { flex-shrink: 0; }
+.resume-content .resume-body { flex: none; padding: var(--density-padding, 20px) 28px; gap: var(--density-gap, 14px); }
+.resume-content .resume-section-title { margin-bottom: var(--density-section, 8px); font-size: calc(.95rem * var(--density-font, 1)); }
+.resume-content .resume-item { margin-bottom: var(--density-item, 12px); }
+.resume-content .resume-item:last-child { margin-bottom: 0; }
+.resume-content .resume-item-title { font-size: calc(.94rem * var(--density-font, 1)); }
+.resume-content .resume-item-sub { font-size: calc(.84rem * var(--density-font, 1)); }
+.resume-content .resume-item-date { font-size: calc(.78rem * var(--density-font, 1)); }
+.resume-content .resume-desc-text { font-size: calc(.84rem * var(--density-font, 1)); line-height: var(--density-line, 1.45); }
+.resume-content #res-premium-text { font-size: calc(.82rem * var(--density-font, 1)) !important; }
+.resume-content .resume-pill, .resume-content .res-mach-chip { padding-top: var(--density-chip, 6px); padding-bottom: var(--density-chip, 6px); font-size: calc(.8rem * var(--density-font, 1)); line-height: var(--density-line, 1.4); }
+@media print {
+  html, body, #screen-share { width: 210mm !important; height: 296mm !important; overflow: hidden !important; }
+  .resume-wrapper, .resume-preview { width: 210mm; }
+  .resume-preview, #resume-paper { height: 296mm; min-height: 296mm; }
+  #resume-paper { width: 210mm; min-width: 210mm; }
+  .resume-content { width: 100%; zoom: 1; margin: 0; }
+}

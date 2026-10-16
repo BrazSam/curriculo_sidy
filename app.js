@@ -18,6 +18,7 @@ const state = {
   cnh: 'B',
   cursoInicio: '',
   cursoFim: '',
+  includeMachineCourse: true,
   maquinas: [
     'Escavadeira Hidráulica',
     'Retroescavadeira',
@@ -56,6 +57,12 @@ const MACHINE_ICONS = {
 
 // 2. INICIALIZAÇÃO — atualiza o ano do rodapé e a conclusão do curso
 document.addEventListener('DOMContentLoaded', () => {
+  const header = document.querySelector('.app-header');
+  if (header) {
+    const updateHeaderOffset = () => document.documentElement.style.setProperty('--header-offset', `${header.getBoundingClientRect().height + 16}px`);
+    updateHeaderOffset();
+    new ResizeObserver(updateHeaderOffset).observe(header);
+  }
   document.getElementById('foot-year').textContent = new Date().getFullYear();
   validateField(document.getElementById('f-nasc'));
   // Pré-preenche a conclusão do curso com o mês atual.
@@ -182,6 +189,23 @@ function setFieldError(input, message) {
   feedback.textContent = message;
 }
 
+function maskBirthDate(input) {
+  const digits = input.value.replace(/\D/g, '').slice(0, 8);
+  input.value = digits.slice(0, 2) + (digits.length > 2 ? '/' + digits.slice(2, 4) : '') +
+    (digits.length > 4 ? '/' + digits.slice(4) : '');
+  if (input.classList.contains('is-invalid') || digits.length === 8) validateField(input);
+}
+
+function birthDateISO(value) {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!match) return '';
+  const [, day, month, year] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  if (Number(year) < 1000 || date.getFullYear() !== Number(year) ||
+    date.getMonth() !== Number(month) - 1 || date.getDate() !== Number(day)) return '';
+  return `${year}-${month}-${day}`;
+}
+
 function validateField(input, required = input.required) {
   // Usa o dia do aparelho e atualiza o limite mesmo se a página ficou aberta de um dia para o outro.
   if (input.id === 'f-nasc') {
@@ -197,8 +221,13 @@ function validateField(input, required = input.required) {
       message = `Use no máximo ${input.maxLength} caracteres.`;
     } else if (input.id === 'f-telefone' && !/^\d{10,11}$/.test(value.replace(/\D/g, ''))) {
       message = 'Informe o telefone com DDD: 10 ou 11 dígitos.';
-    } else if (input.id === 'f-nasc' && input.validity.rangeOverflow) {
+    } else if (input.id === 'f-nasc' && value && !birthDateISO(value)) {
+      message = 'Informe uma data válida no formato DD/MM/AAAA.';
+    } else if (input.id === 'f-nasc' && value && birthDateISO(value) > input.max) {
       message = 'A data de nascimento não pode ser no futuro.';
+    } else if (input.classList.contains('formacao-ano') && value &&
+      (!/^[1-9]\d{3}$/.test(value) || Number(value) > new Date().getFullYear())) {
+      message = 'Informe um ano de conclusão válido com 4 dígitos, até o ano atual.';
     } else if (!input.validity.valid) {
       message =
         input.type === 'email'
@@ -285,6 +314,59 @@ function toggleCurrentJob(index, isChecked) {
   }
 }
 
+function addFormation() {
+  const block = document.querySelector('.formacao-block[hidden]');
+  if (!block) return;
+  block.hidden = false;
+  block.querySelectorAll('input').forEach(field => { field.required = true; });
+  document.getElementById('btn-add-formacao').hidden = !document.querySelector('.formacao-block[hidden]');
+  block.querySelector('input').focus({ preventScroll: true });
+  block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleMachineCourse(enabled) {
+  state.includeMachineCourse = enabled;
+  document.getElementById('machine-course-fields').hidden = !enabled;
+  document.getElementById('f-curso-fim').disabled = !enabled;
+}
+
+function removeFormation(index) {
+  const block = document.getElementById('formacao-block-' + index);
+  block.querySelectorAll('input').forEach(field => {
+    field.value = '';
+    field.required = false;
+    setFieldError(field, '');
+    updateCharacterCount(field);
+  });
+  block.hidden = true;
+  const button = document.getElementById('btn-add-formacao');
+  button.hidden = false;
+  button.focus({ preventScroll: true });
+  button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function validateFormationBlock(block) {
+  const fields = [...block.querySelectorAll('input')];
+  fields.forEach(field => validateField(field, true));
+  return fields.filter(field => field.classList.contains('is-invalid'));
+}
+
+function validateFormations() {
+  const invalid = [...document.querySelectorAll('.formacao-block:not([hidden])')]
+    .flatMap(validateFormationBlock);
+  if (invalid.length) {
+    invalid[0].focus({ preventScroll: true });
+    invalid[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return invalid.length === 0;
+}
+
+document.querySelectorAll('.formacao-block').forEach(block => {
+  block.addEventListener('input', () => {
+    if (!block.hidden && block.querySelector('.is-invalid')) validateFormationBlock(block);
+  });
+});
+
 function addExp2() {
   document.getElementById('exp-block-1').style.display = 'block';
   document.getElementById('btn-add-exp').style.display = 'none';
@@ -327,7 +409,7 @@ function validateExperience() {
   });
   if (invalid.length) {
     invalid[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-    invalid[0].focus();
+    invalid[0].focus({ preventScroll: true });
   }
   return invalid.length === 0;
 }
@@ -368,8 +450,13 @@ function validateAndGoToReview() {
     const firstInvalid = document.querySelector('.form-control.is-invalid');
     if (firstInvalid) {
       firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      firstInvalid.focus();
+      firstInvalid.focus({ preventScroll: true });
     }
+    return;
+  }
+
+  if (!validateFormations()) {
+    alert('Confira os campos destacados da formação para continuar. Se não quiser informá-la, clique em Remover formação.');
     return;
   }
 
@@ -380,7 +467,7 @@ function validateAndGoToReview() {
 
   // Copia os dados preenchidos para o estado do currículo
   state.nome = nomeEl.value.trim();
-  state.nascimento = document.getElementById('f-nasc').value;
+  state.nascimento = birthDateISO(document.getElementById('f-nasc').value.trim());
   state.cidade = cidadeEl.value.trim();
   state.uf = ufEl.value;
   state.bairro = document.getElementById('f-bairro').value.trim();
@@ -389,6 +476,7 @@ function validateAndGoToReview() {
   state.cnh = document.getElementById('f-cnh').value;
 
   state.cursoFim = document.getElementById('f-curso-fim').value;
+  state.includeMachineCourse = document.getElementById('include-machine-course').checked;
 
   // Máquinas
   const mEls = document.querySelectorAll('input[name="maquinas"]:checked');
@@ -439,6 +527,7 @@ function validateAndGoToReview() {
   const formacaoBlocks = document.querySelectorAll('.formacao-block');
   state.outrasFormacoes = [];
   formacaoBlocks.forEach((block) => {
+    if (block.hidden) return;
     const curso = block.querySelector('.formacao-curso').value.trim();
     if (!curso) return;
     state.outrasFormacoes.push({
@@ -499,21 +588,36 @@ function textElement(tag, text, className = '', styles = '') {
 }
 
 function renderContacts(id, includeBirth = false) {
+  const paths = {
+    location: 'M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z M15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+    phone: 'M7 2h10v20H7z M10 5h4 M11 19h2',
+    email: 'M3 5h18v14H3z M3 5l9 7 9-7',
+    license: 'M2 4h20v16H2z M15 9h4 M15 13h4 M5 17c0-4 7-4 7 0 M10 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0',
+    birth: 'M3 5h18v16H3z M7 3v4 M17 3v4 M3 10h18 M7 14h2 M12 14h2 M7 17h2',
+  };
   const contacts = [
-    `📍 ${state.cidade}/${state.uf}${state.bairro ? ' (' + state.bairro + ')' : ''}`,
-    `📱 ${state.telefone}`,
+    ['location', `${state.cidade}/${state.uf}${state.bairro ? ' (' + state.bairro + ')' : ''}`],
+    ['phone', state.telefone],
   ];
-  if (state.email) contacts.push(`✉ ${state.email}`);
-  if (state.cnh && state.cnh !== 'Não possuo') contacts.push(`🪪 CNH Categoria ${state.cnh}`);
+  if (state.email) contacts.push(['email', state.email]);
+  if (state.cnh && state.cnh !== 'Não possuo') contacts.push(['license', `CNH Categoria ${state.cnh}`]);
   if (includeBirth && state.nascimento) {
     const [y, m, d] = state.nascimento.split('-');
-    contacts.push(`🎂 Nasc: ${d}/${m}/${y}`);
+    contacts.push(['birth', `Nasc: ${d}/${m}/${y}`]);
   }
   const container = document.getElementById(id);
   container.replaceChildren();
-  contacts.forEach((contact, index) => {
+  contacts.forEach(([kind, contact], index) => {
     if (includeBirth && index > 0) container.append(' · ');
-    container.append(textElement('span', contact));
+    const span = textElement('span', '', 'contact-item');
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    Object.entries({ width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' })
+      .forEach(([key, value]) => svg.setAttribute(key, value));
+    const path = document.createElementNS(svg.namespaceURI, 'path');
+    path.setAttribute('d', paths[kind]);
+    svg.append(path);
+    span.append(svg, document.createTextNode(contact));
+    container.append(span);
   });
 }
 
@@ -551,11 +655,12 @@ function renderReview() {
   document.getElementById('rev-nome').textContent = state.nome;
 
   renderContacts('rev-contatos');
+  document.getElementById('rev-machine-course').hidden = state.includeMachineCourse === false;
 
   // Periodo curso
   let pCurso = 'Carga horária de 66 horas certificadas';
   if (state.cursoInicio || state.cursoFim) {
-    pCurso = `Período: ${formatMonthYear(state.cursoInicio) || 'Início'} até ${formatMonthYear(state.cursoFim) || 'Conclusão'}`;
+    pCurso = state.cursoFim ? `Conclusão: ${formatMonthYear(state.cursoFim)}` : '';
   }
   document.getElementById('rev-curso-periodo').textContent = pCurso;
 
@@ -696,11 +801,12 @@ function generateResumeAndShow() {
 
   // Contatos do candidato
   renderContacts('res-contacts-row', true);
+  document.getElementById('res-machine-course').hidden = state.includeMachineCourse === false;
 
   // Período do curso
   let dCourse = 'Carga Horária de 66 Horas Certificadas';
   if (state.cursoInicio || state.cursoFim) {
-    dCourse = `${formatMonthYear(state.cursoInicio) || 'Início'} – ${formatMonthYear(state.cursoFim) || 'Conclusão'}`;
+    dCourse = formatMonthYear(state.cursoFim) || '';
   }
   document.getElementById('res-dates-course').textContent = dCourse;
 
@@ -851,22 +957,33 @@ async function prepareResumePDF() {
   document.querySelector('#screen-share .resume-wrapper').hidden = true;
   status.textContent = 'Preparando seu PDF...';
   try {
+    if (!navigator.onLine) throw new Error('Você está sem conexão. Verifique sua internet e tente novamente.');
     const payload = JSON.parse(JSON.stringify(state));
     payload.photoDataUrl = await compressResumePhoto(payload.photoDataUrl);
     if (version !== resumeVersion) return;
     const response = await fetch('/api/resume', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload), signal: controller.signal,
+    }).catch(error => {
+      if (error.name === 'AbortError') throw error;
+      throw new Error(navigator.onLine
+        ? 'Não foi possível conectar ao serviço de PDF. Verifique sua internet e tente novamente.'
+        : 'Você está sem conexão. Verifique sua internet e tente novamente.');
     });
     if (!response.ok) {
       const message = await response.json().catch(() => ({}));
-      throw new Error(message.error || 'Não foi possível gerar o PDF. Tente novamente.');
+      throw new Error(response.status >= 500
+        ? 'Não foi possível gerar seu PDF agora. Tente novamente em instantes.'
+        : message.error || 'Não foi possível gerar o PDF. Confira os dados e tente novamente.');
     }
     if (!response.headers.get('content-type')?.includes('application/pdf')) {
       throw new Error('O serviço de PDF não está disponível. Use o servidor do projeto ou a versão publicada.');
     }
     // Este mesmo arquivo vai para a prévia, o download e o WhatsApp.
-    const blob = await response.blob();
+    const blob = await response.blob().catch(error => {
+      if (error.name === 'AbortError') throw error;
+      throw new Error('O recebimento do PDF foi interrompido. Verifique sua internet e tente novamente.');
+    });
     if (version !== resumeVersion) return;
     const filename = 'Curriculo_SIDY_' + (payload.nome.replace(/[^\p{L}\p{N}_-]+/gu, '_') || 'Aluno') + '.pdf';
     resumeFile = new File([blob], filename, { type: 'application/pdf' });
@@ -888,7 +1005,7 @@ async function prepareResumePDF() {
     }
   } catch (error) {
     if (version !== resumeVersion) return;
-    status.textContent = error.name === 'AbortError' ? 'A geração demorou mais que o esperado. Tente novamente.' : error.message;
+    status.textContent = error.name === 'AbortError' ? 'A geração demorou mais que o esperado. Tente novamente.' : error.message || 'Não foi possível gerar seu PDF agora. Tente novamente em instantes.';
     retry.hidden = false;
   } finally {
     clearTimeout(timeout);
@@ -897,14 +1014,36 @@ async function prepareResumePDF() {
   }
 }
 
-function downloadResumePDF() {
+async function downloadResumePDF() {
   if (!resumeFile || !resumeUrl) return;
+  const file = resumeFile;
+  const url = resumeUrl;
+  const status = document.getElementById('pdf-status');
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: file.name,
+        types: [{ description: 'Documento PDF', accept: { 'application/pdf': ['.pdf'] } }],
+      });
+      const writable = await handle.createWritable();
+      await writable.write(file);
+      await writable.close();
+      if (file === resumeFile) status.textContent = 'PDF salvo com sucesso!';
+      return;
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      // Se o navegador bloquear a escolha de pasta, usa o download convencional.
+    }
+  }
   const link = document.createElement('a');
-  link.href = resumeUrl;
-  link.download = resumeFile.name;
+  link.href = url;
+  link.download = file.name;
+  link.target = '_blank';
+  link.rel = 'noopener';
   document.body.append(link);
   link.click();
   link.remove();
+  if (file === resumeFile) status.textContent = 'Download solicitado. Se o navegador abrir o PDF, use Salvar ou Imprimir. Você também pode usar “Abrir PDF / Imprimir”.';
 }
 
 function showShareFallback() {
@@ -955,9 +1094,23 @@ function fitResumeToPage() {
   const paper = document.getElementById('resume-paper');
   const content = paper.querySelector('.resume-content');
   if (!paper.offsetWidth) return;
-  const scale = Math.min(1, paper.clientWidth / content.offsetWidth, (paper.clientHeight - 2) / content.scrollHeight);
-  paper.style.setProperty('--resume-fit', scale);
-  paper.style.setProperty('--resume-left', ((paper.clientWidth - content.offsetWidth * scale) / 2) + 'px');
+  // Mantém a largura e o cabeçalho. Compacta primeiro os espaços, depois a tipografia.
+  const densities = [
+    { gap: 14, padding: 20, section: 8, item: 12, chip: 6, font: 1, line: 1.45 },
+    { gap: 10, padding: 16, section: 6, item: 9, chip: 5, font: 1, line: 1.4 },
+    { gap: 7, padding: 12, section: 5, item: 7, chip: 4, font: 1, line: 1.35 },
+    { gap: 6, padding: 10, section: 4, item: 6, chip: 3, font: .94, line: 1.3 },
+  ];
+  let fits = false;
+  for (const [index, density] of densities.entries()) {
+    for (const [key, value] of Object.entries(density)) {
+      paper.style.setProperty('--density-' + key, value + (['font', 'line'].includes(key) ? '' : 'px'));
+    }
+    paper.dataset.density = String(index);
+    fits = content.scrollHeight <= paper.clientHeight - 2 && content.scrollWidth <= paper.clientWidth + 1;
+    if (fits) break;
+  }
+  paper.dataset.fits = String(fits);
   const wrapper = paper.closest('.resume-wrapper');
   const style = getComputedStyle(wrapper);
   const available = wrapper.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
@@ -966,6 +1119,7 @@ function fitResumeToPage() {
   preview.style.setProperty('--preview-width', paper.offsetWidth * previewScale + 'px');
   preview.style.setProperty('--preview-height', paper.offsetHeight * previewScale + 'px');
   paper.style.setProperty('--preview-scale', previewScale);
+  return fits;
 }
 async function prepareResumeLayout() {
   await document.fonts.ready;
