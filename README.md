@@ -51,6 +51,13 @@ Depois da publicação, valide a geração na URL de preview da Vercel e o envio
 
 ### Como funciona
 
+- Os campos mostram o primeiro aviso ao perder o foco ou ao tentar revisar; depois acompanham as correções durante a digitação.
+- CNH B, máquinas e disponibilidades começam selecionadas. A certificação Premium começa sem seleção e só inclui as NRs ao marcar “Sim, possuo”. Estado e experiência precisam ser escolhidos pelo aluno.
+- Ao incluir o curso SIDY, informe o mês de conclusão. O curso e as experiências não aceitam datas futuras.
+- Sem máquinas selecionadas, essa seção é omitida do PDF. O botão de foto também funciona pelo teclado.
+- Informações adicionais permitem até dois checks personalizados de 50 caracteres cada. É possível desmarcar ou remover cada um; somente os selecionados entram na revisão e no PDF.
+- O limite também é validado no servidor. Duplicatas são rejeitadas mesmo com diferenças de maiúsculas, espaços extras ou o texto abreviado das opções fixas.
+
 - O navegador envia somente os dados do formulário e a foto recortada proporcionalmente, limitada a 600 × 600 pixels.
 - O servidor valida os dados e renderiza o modelo local em Chromium, com fontes locais e página A4 fixa (210 × 297 mm).
 - URLs externas são bloqueadas durante a renderização. O serviço não salva o currículo nem registra os dados preenchidos; a resposta usa `Cache-Control: no-store`.
@@ -58,7 +65,7 @@ Depois da publicação, valide a geração na URL de preview da Vercel e o envio
 - Download, visualização e compartilhamento reutilizam o mesmo `File`, sem gerar outra versão no clique.
 - Para baixar, um formulário envia o PDF já pronto a `/api/download`, que devolve os mesmos bytes como anexo (`Content-Disposition: attachment`), sem armazenamento. Isso evita depender de downloads de URLs `blob:` no Safari; o navegador pode solicitar confirmação.
 - O botão WhatsApp abre o compartilhamento do sistema; o usuário escolhe o aplicativo e o contato. Sem suporte, oferece download e envio manual.
-- Conteúdo que exigiria redução abaixo de 65% é recusado com orientação para resumir, evitando cortes silenciosos ou letras excessivamente pequenas.
+- O documento compacta primeiro os espaços e depois reduz levemente a tipografia. Se ainda não couber em uma página, pede para resumir o conteúdo, evitando cortes silenciosos.
 
 ### Verificação
 

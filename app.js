@@ -11,39 +11,19 @@ const state = {
   nome: '',
   nascimento: '',
   cidade: '',
-  uf: 'SP',
+  uf: '',
   bairro: '',
   telefone: '',
   email: '',
-  cnh: 'B',
+  cnh: document.getElementById('f-cnh').value,
   cursoInicio: '',
   cursoFim: '',
   includeMachineCourse: true,
-  maquinas: [
-    'Escavadeira Hidráulica',
-    'Retroescavadeira',
-    'Pá Carregadeira',
-    'Mini Pá Carregadeira (Bobcat)',
-  ],
-  isPremium: true,
-  hasExperience: true,
-  experiencias: [
-    {
-      empresa: '',
-      cargo: '',
-      inicio: '',
-      fim: '',
-      atual: false,
-      atividades: '',
-    },
-  ],
-  adicionais: [
-    'Disponibilidade para estágio prático',
-    'Início imediato',
-    'Disponibilidade para viagens',
-    'Disponibilidade para mudança de cidade',
-    'Disponibilidade de horário (turnos/escalas)',
-  ],
+  maquinas: [...document.querySelectorAll('input[name="maquinas"]:checked')].map(field => field.value),
+  isPremium: document.querySelector('input[name="premium_sidy"][value="sim"]').checked,
+  hasExperience: null,
+  experiencias: [],
+  adicionais: [...document.querySelectorAll('input[name="adicionais"]:checked')].map(field => field.value),
   outrasInfo: '',
   outrasFormacoes: [],
 };
@@ -55,7 +35,7 @@ const MACHINE_ICONS = {
   'Mini Pá Carregadeira (Bobcat)': 'img/mini pá.png',
 };
 
-// 2. INICIALIZAÇÃO — atualiza o ano do rodapé e a conclusão do curso
+// 2. INICIALIZAÇÃO — limites de datas e aparência das opções
 document.addEventListener('DOMContentLoaded', () => {
   const header = document.querySelector('.app-header');
   if (header) {
@@ -64,14 +44,19 @@ document.addEventListener('DOMContentLoaded', () => {
     new ResizeObserver(updateHeaderOffset).observe(header);
   }
   document.getElementById('foot-year').textContent = new Date().getFullYear();
-  validateField(document.getElementById('f-nasc'));
-  // Pré-preenche a conclusão do curso com o mês atual.
-  const now = new Date();
-  const fim = new Date(now.getFullYear(), now.getMonth(), 1);
-  const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-
-  document.getElementById('f-curso-fim').value = fmt(fim); // mês atual
+  updateDateLimits();
+  document.querySelectorAll('.custom-check-pill input').forEach(togglePillActive);
+  updateMachineSelection();
 });
+
+// Efeitos breves só na interface; o modelo usado pelo PDF permanece estático.
+function animateAppearance(element, duration = 180, distance = 6) {
+  if (window.__PDF_SERVER__ || window.matchMedia('(prefers-reduced-motion: reduce)').matches || !element.animate) return;
+  element.animate([
+    { opacity: 0, transform: `translateY(${distance}px)` },
+    { opacity: 1, transform: 'translateY(0)' },
+  ], { duration, easing: 'cubic-bezier(.2, .7, .3, 1)' });
+}
 
 // 3. NAVEGAÇÃO — alterna as quatro telas e atualiza o indicador
 function goToStep(stepNum) {
@@ -91,7 +76,7 @@ function goToStep(stepNum) {
       }
     }
   });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
 }
 
 // 4. FOTO — leitura do arquivo, prévia e iniciais
@@ -147,12 +132,14 @@ function updatePhotoPreview() {
     imgEl.style.display = 'block';
     initialsEl.style.display = 'none';
     removeBtn.style.display = 'inline-flex';
+    animateAppearance(imgEl, 160, 0);
   } else {
     imgEl.src = '';
     imgEl.style.display = 'none';
     initialsEl.style.display = 'block';
     removeBtn.style.display = 'none';
     updateInitials();
+    animateAppearance(initialsEl, 160, 0);
   }
 }
 
@@ -190,6 +177,7 @@ function maskPhone(input) {
 
 // Mostra o erro junto ao campo e o associa para leitores de tela.
 function setFieldError(input, message) {
+  input.dataset.validated = 'true';
   input.classList.toggle('is-invalid', Boolean(message));
   input.setAttribute('aria-invalid', String(Boolean(message)));
   let feedback = input.nextElementSibling;
@@ -213,11 +201,55 @@ function setFieldError(input, message) {
   feedback.textContent = message;
 }
 
+function resetFieldValidation(field) {
+  setFieldError(field, '');
+  delete field.dataset.validated;
+}
+
 function maskBirthDate(input) {
   const digits = input.value.replace(/\D/g, '').slice(0, 8);
   input.value = digits.slice(0, 2) + (digits.length > 2 ? '/' + digits.slice(2, 4) : '') +
     (digits.length > 4 ? '/' + digits.slice(4) : '');
-  if (input.classList.contains('is-invalid') || digits.length === 8) validateField(input);
+}
+
+function currentMonth() {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function updateDateLimits() {
+  document.querySelectorAll('.exp-inicio, .exp-fim').forEach(field => { field.max = currentMonth(); });
+  const end = document.getElementById('f-curso-fim');
+  end.max = currentMonth();
+}
+
+// O primeiro aviso aparece ao sair do campo ou tentar continuar.
+// Depois, o aviso acompanha a correção, mesmo após o campo ficar válido.
+document.getElementById('cv-form').addEventListener('focusout', event => {
+  const field = event.target;
+  if (!field.matches('.form-control') || field.disabled || field.closest('[hidden]')) return;
+  validateFormField(field);
+});
+document.getElementById('cv-form').addEventListener('input', event => {
+  const field = event.target;
+  if (field.matches('.form-control') && field.dataset.validated) validateFormField(field);
+});
+function validateFormField(field) {
+  const experience = field.closest('.exp-block');
+  if (experience) return validateExperienceField(field);
+  return validateField(field);
+}
+
+function validateExperienceField(field) {
+  validateField(field, true);
+  const block = field.closest('.exp-block');
+  const inicio = block.querySelector('.exp-inicio');
+  const fim = block.querySelector('.exp-fim');
+  if (field === inicio && fim.dataset.validated) validateField(fim, true);
+  if (!fim.disabled && inicio.value && fim.value && fim.value < inicio.value &&
+      (field === fim || fim.dataset.validated)) {
+    setFieldError(fim, 'A data de saída não pode ser anterior à data de início.');
+  }
 }
 
 function birthDateISO(value) {
@@ -231,6 +263,7 @@ function birthDateISO(value) {
 }
 
 function validateField(input, required = input.required) {
+  updateDateLimits();
   // Usa o dia do aparelho e atualiza o limite mesmo se a página ficou aberta de um dia para o outro.
   if (input.id === 'f-nasc') {
     const today = new Date();
@@ -252,6 +285,10 @@ function validateField(input, required = input.required) {
     } else if (input.classList.contains('formacao-ano') && value &&
       (!/^[1-9]\d{3}$/.test(value) || Number(value) > new Date().getFullYear())) {
       message = 'Informe um ano de conclusão válido com 4 dígitos, até o ano atual.';
+    } else if (input.type === 'month' && value && !/^[1-9]\d{3}-(0[1-9]|1[0-2])$/.test(value)) {
+      message = 'Informe um mês e ano válidos.';
+    } else if (input.type === 'month' && value && input.max && value > input.max) {
+      message = 'A data não pode ser no futuro.';
     } else if (!input.validity.valid) {
       message =
         input.type === 'email'
@@ -271,6 +308,13 @@ function togglePillActive(checkbox) {
   } else {
     label.classList.remove('checked');
   }
+  if (checkbox.name === 'maquinas') updateMachineSelection();
+}
+
+function updateMachineSelection() {
+  const machines = [...document.querySelectorAll('input[name="maquinas"]')];
+  document.getElementById('btn-toggle-machines').textContent = machines.every(field => field.checked)
+    ? 'Desmarcar todas' : 'Selecionar todas';
 }
 
 function toggleAllMachines() {
@@ -280,6 +324,84 @@ function toggleAllMachines() {
     c.checked = !allChecked;
     togglePillActive(c);
   });
+}
+
+// Informações criadas pelo aluno usam os mesmos checks das disponibilidades.
+function addAdditionalInfo() {
+  const field = document.getElementById('f-outras-info');
+  const value = field.value.trim().replace(/\s+/g, ' ').normalize('NFC');
+  const options = document.getElementById('additional-options');
+  if (!value) {
+    setFieldError(field, 'Escreva a informação que deseja adicionar.');
+    field.focus();
+    return false;
+  }
+  if (!validateField(field)) { field.focus(); return false; }
+  if (options.querySelectorAll('.custom-additional').length >= 2) return false;
+  const comparison = text => text.trim().replace(/\s+/g, ' ').normalize('NFC').toLocaleLowerCase('pt-BR');
+  if ([...options.querySelectorAll('input')].some(input =>
+    comparison(input.value) === comparison(value) ||
+    comparison(input.closest('label').querySelector('span').textContent) === comparison(value))) {
+    setFieldError(field, 'Esta informação já está na lista acima.');
+    field.focus();
+    return false;
+  }
+  const item = textElement('div', '', 'custom-additional');
+  const label = textElement('label', '', 'custom-check-pill checked');
+  const check = document.createElement('input');
+  check.type = 'checkbox';
+  check.name = 'adicionais';
+  check.value = value;
+  check.checked = true;
+  check.addEventListener('change', () => togglePillActive(check));
+  label.append(check, textElement('span', value));
+  const remove = textElement('button', 'Remover', 'btn-edit-sec');
+  remove.type = 'button';
+  remove.setAttribute('aria-label', `Remover informação: ${value}`);
+  remove.addEventListener('click', () => {
+    if (remove.disabled) return;
+    remove.disabled = true;
+    check.disabled = true;
+    item.classList.remove('additional-arriving');
+    item.classList.add('additional-leaving');
+    const finishRemoval = () => {
+      const restoreFocus = document.activeElement === document.body || item.contains(document.activeElement);
+      item.remove();
+      updateAdditionalInfoLimit();
+      if (restoreFocus) field.focus({ preventScroll: true });
+    };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !item.animate) {
+      finishRemoval();
+    } else {
+      const animation = item.animate([
+        { opacity: 1, transform: 'translateY(0)' },
+        { opacity: 0, transform: 'translateY(-8px)' },
+      ], { duration: 180, easing: 'cubic-bezier(.4, 0, .6, 1)', fill: 'forwards' });
+      animation.finished.then(finishRemoval, finishRemoval);
+    }
+  });
+  item.append(label, remove);
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceMotion) {
+    item.classList.add('additional-arriving');
+    label.addEventListener('animationend', () => item.classList.remove('additional-arriving'), { once: true });
+  }
+  options.append(item);
+  field.value = '';
+  resetFieldValidation(field);
+  updateCharacterCount(field);
+  updateAdditionalInfoLimit();
+  check.focus({ preventScroll: true });
+  label.scrollIntoView({ behavior: reduceMotion ? 'instant' : 'smooth', block: 'nearest' });
+  return true;
+}
+
+function updateAdditionalInfoLimit() {
+  const count = document.querySelectorAll('#additional-options .custom-additional').length;
+  document.getElementById('btn-add-info').disabled = count >= 2;
+  document.getElementById('f-outras-info').disabled = count >= 2;
+  document.getElementById('additional-info-status').textContent = `${count} de 2 informações adicionadas` +
+    (count >= 2 ? '. Remova uma para adicionar outra.' : '');
 }
 
 function handlePremiumToggle(isSim) {
@@ -294,6 +416,7 @@ function handlePremiumToggle(isSim) {
   });
   if (isSim) {
     infoBox.style.display = 'block';
+    animateAppearance(infoBox);
   } else {
     infoBox.style.display = 'none';
   }
@@ -313,10 +436,13 @@ function handleExpToggle() {
     naoRadio.closest('.custom-check-pill').classList.toggle('checked', naoRadio.checked);
 
   state.hasExperience = temExp;
+  document.getElementById('experience-choice-error').hidden = true;
+  [simRadio, naoRadio].forEach(radio => radio.setAttribute('aria-invalid', 'false'));
 
   const container = document.getElementById('experience-container');
   if (container) {
     container.style.display = temExp ? 'block' : 'none';
+    if (temExp) animateAppearance(container);
   }
   if (!temExp) {
     state.experiencias = [];
@@ -333,8 +459,7 @@ function toggleCurrentJob(index, isChecked) {
     } else if (fimInput.dataset.previous) {
       fimInput.value = fimInput.dataset.previous;
     }
-    const block = fimInput.closest('.exp-block');
-    if (block.querySelector('.is-invalid')) validateExperienceBlock(block);
+    if (fimInput.dataset.validated) validateExperienceField(fimInput);
   }
 }
 
@@ -342,6 +467,7 @@ function addFormation() {
   const block = document.querySelector('.formacao-block[hidden]');
   if (!block) return;
   block.hidden = false;
+  animateAppearance(block, 200);
   block.querySelectorAll('input').forEach(field => { field.required = true; });
   document.getElementById('btn-add-formacao').hidden = !document.querySelector('.formacao-block[hidden]');
   block.querySelector('input').focus({ preventScroll: true });
@@ -351,7 +477,9 @@ function addFormation() {
 function toggleMachineCourse(enabled) {
   state.includeMachineCourse = enabled;
   document.getElementById('machine-course-fields').hidden = !enabled;
+  if (enabled) animateAppearance(document.getElementById('machine-course-fields'));
   document.getElementById('f-curso-fim').disabled = !enabled;
+  if (!enabled) document.querySelectorAll('#machine-course-fields .form-control').forEach(resetFieldValidation);
 }
 
 function removeFormation(index) {
@@ -359,7 +487,7 @@ function removeFormation(index) {
   block.querySelectorAll('input').forEach(field => {
     field.value = '';
     field.required = false;
-    setFieldError(field, '');
+    resetFieldValidation(field);
     updateCharacterCount(field);
   });
   block.hidden = true;
@@ -385,14 +513,9 @@ function validateFormations() {
   return invalid.length === 0;
 }
 
-document.querySelectorAll('.formacao-block').forEach(block => {
-  block.addEventListener('input', () => {
-    if (!block.hidden && block.querySelector('.is-invalid')) validateFormationBlock(block);
-  });
-});
-
 function addExp2() {
   document.getElementById('exp-block-1').style.display = 'block';
+  animateAppearance(document.getElementById('exp-block-1'), 200);
   document.getElementById('btn-add-exp').style.display = 'none';
 }
 
@@ -406,7 +529,7 @@ function removeExp2() {
     else el.value = '';
     el.disabled = false;
     delete el.dataset.previous;
-    setFieldError(el, '');
+    resetFieldValidation(el);
     updateCharacterCount(el);
   });
 }
@@ -438,13 +561,6 @@ function validateExperience() {
   return invalid.length === 0;
 }
 
-// Após a primeira validação, atualiza os avisos enquanto o aluno corrige os dados.
-document.querySelectorAll('.exp-block').forEach((block) => {
-  block.addEventListener('input', () => {
-    if (block.querySelector('.is-invalid')) validateExperienceBlock(block);
-  });
-});
-
 // 8. REVISÃO — valida o formulário e copia os valores para state
 function validateAndGoToReview() {
   if (photoUploadPending) {
@@ -472,6 +588,7 @@ function validateAndGoToReview() {
   if (!validateField(telEl)) isValid = false;
   if (!validateField(emailEl)) isValid = false;
   if (!validateField(document.getElementById('f-nasc'))) isValid = false;
+  if (!validateField(document.getElementById('f-curso-fim'))) isValid = false;
 
   if (!isValid) {
     // Leva o foco ao primeiro campo inválido
@@ -485,6 +602,15 @@ function validateAndGoToReview() {
 
   if (!validateFormations()) {
     alert('Confira os campos destacados da formação para continuar. Se não quiser informá-la, clique em Remover formação.');
+    return;
+  }
+
+  if (!document.querySelector('input[name="has_experience"]:checked')) {
+    const error = document.getElementById('experience-choice-error');
+    error.hidden = false;
+    document.querySelectorAll('input[name="has_experience"]').forEach(radio => radio.setAttribute('aria-invalid', 'true'));
+    document.querySelector('input[name="has_experience"]').focus();
+    error.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
 
@@ -546,10 +672,12 @@ function validateAndGoToReview() {
     }
   }
 
+  // Inclui também um texto que ficou digitado antes de clicar em Revisar.
+  if (document.getElementById('f-outras-info').value.trim() && !addAdditionalInfo()) return;
   // Adicionais
-  const adEls = document.querySelectorAll('input[name="adicionais"]:checked');
+  const adEls = document.querySelectorAll('input[name="adicionais"]:checked:not(:disabled)');
   state.adicionais = Array.from(adEls).map((el) => el.value);
-  state.outrasInfo = document.getElementById('f-outras-info').value.trim();
+  state.outrasInfo = '';
 
   // Outras Formações
   const formacaoBlocks = document.querySelectorAll('.formacao-block');
@@ -574,12 +702,14 @@ function editSection(sectionId) {
   setTimeout(() => {
     const sec = document.getElementById(sectionId);
     if (sec) {
-      sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      sec.style.transition = 'box-shadow 0.3s';
-      sec.style.boxShadow = '0 0 0 4px rgba(27, 110, 194, 0.4)';
-      setTimeout(() => {
-        sec.style.boxShadow = '';
-      }, 1500);
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      sec.scrollIntoView({ behavior: reduceMotion ? 'instant' : 'smooth', block: 'center' });
+      if (!reduceMotion && sec.animate) {
+        sec.animate([
+          { boxShadow: '0 0 0 3px rgba(27, 110, 194, 0.2)' },
+          { boxShadow: '0 0 0 0 rgba(27, 110, 194, 0)' },
+        ], { duration: 600, easing: 'ease-out' });
+      }
     }
   }, 100);
 }
@@ -860,10 +990,11 @@ function generateResumeAndShow() {
 
   // Máquinas
   const mList = document.getElementById('res-machines-list');
+  document.getElementById('res-sec-maquinas').hidden = state.maquinas.length === 0;
   if (state.maquinas.length > 0) {
     mList.replaceChildren(...state.maquinas.map(machineChip));
   } else {
-    mList.innerHTML = '<span class="resume-pill">Operador de Máquinas Pesadas em Geral</span>';
+    mList.replaceChildren();
   }
 
   const outras = state.outrasFormacoes.filter((f) => f.curso);
@@ -1062,6 +1193,7 @@ async function prepareResumePDF() {
       if (version !== resumeVersion) return;
       preview.replaceChildren(...pages);
       preview.hidden = false;
+      animateAppearance(preview, 180, 0);
     } catch {
       if (version === resumeVersion) status.textContent = 'PDF pronto! Use o link abaixo para abrir o arquivo.';
     }

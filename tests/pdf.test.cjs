@@ -16,7 +16,7 @@ test('rejects remote photos, oversized fields and malformed lists', () => {
   assert.throws(() => validate({ ...example, nome: 'a'.repeat(601) }));
   assert.throws(() => validate({ ...example, experiencias: {} }));
   assert.equal(validate(example).nome, example.nome);
-  for (const [field, limit] of Object.entries({ nome: 100, cidade: 80, bairro: 80, email: 254, telefone: 16, outrasInfo: 60 })) {
+  for (const [field, limit] of Object.entries({ nome: 100, cidade: 80, bairro: 80, email: 254, telefone: 16, outrasInfo: 50 })) {
     assert.throws(() => validate({ ...example, [field]: 'a'.repeat(limit + 1) }));
   }
   assert.throws(() => validate({ ...example, nascimento: '2023-02-29' }));
@@ -108,6 +108,8 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
       const invalidYears = ['abcd', '123', '0000', String(new Date().getFullYear() + 1)]
         .map(value => { year.value = value; return validateFormations(); });
       year.value = String(new Date().getFullYear());
+      block.querySelector('.formacao-curso').dispatchEvent(new Event('input', { bubbles: true }));
+      block.querySelector('.formacao-instituicao').dispatchEvent(new Event('input', { bubbles: true }));
       year.dispatchEvent(new Event('input', { bubbles: true }));
       const corrected = !block.querySelector('.is-invalid') && validateFormations();
       addFormation();
@@ -203,7 +205,7 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
         atividades: 'Operação e manutenção de máquinas, inspeção de equipamentos e apoio às equipes.' })),
       adicionais: ['Disponibilidade para estágio prático', 'Início imediato', 'Disponibilidade para viagens',
         'Disponibilidade para mudança de cidade', 'Disponibilidade de horário (turnos/escalas)'],
-      outrasInfo: 'Última informação: disponibilidade para entrevista.',
+      outrasInfo: 'Última informação: disponível para entrevista.',
     };
     const densePDF = await renderPDF(validate(densePayload));
     await fs.writeFile('tmp/pdfs/dense.pdf', densePDF);
@@ -211,7 +213,7 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
     const denseDoc = await denseTask.promise;
     assert.equal(denseDoc.numPages, 1);
     const denseText = (await (await denseDoc.getPage(1)).getTextContent()).items.map(item => item.str).join(' ');
-    assert.match(denseText, /Última informação: disponibilidade para entrevista/);
+    assert.match(denseText, /Última informação: disponível para entrevista/);
     assert.equal((denseText.match(/Empresa de construção e serviços locais/g) || []).length, 2);
     await denseTask.destroy();
     const densityCheck = await page.evaluate(payload => {
@@ -241,6 +243,17 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
     assert.doesNotMatch(noCourseText, /Curso de Operador de Máquinas Pesadas|66 Horas|Capacitação técnica operacional/);
     assert.match(noCourseText, /Informática/);
     await noCourseTask.destroy();
+    const expectedCourse = await renderPDF(validate({ ...example, maquinas: [], cursoFim: '2020-01',
+      adicionais: ['Trabalho em equipe', 'Facilidade para aprender'] }));
+    const expectedTask = getDocument({ data: new Uint8Array(expectedCourse), useSystemFonts: true });
+    const expectedDoc = await expectedTask.promise;
+    assert.equal(expectedDoc.numPages, 1);
+    const expectedText = (await (await expectedDoc.getPage(1)).getTextContent()).items.map(item => item.str).join(' ');
+    assert.match(expectedText, /Jan\/2020/);
+    assert.match(expectedText, /Trabalho em equipe/);
+    assert.match(expectedText, /Facilidade para aprender/);
+    assert.doesNotMatch(expectedText, /Máquinas Operadas|Operador de Máquinas Pesadas em Geral/);
+    await expectedTask.destroy();
     const toggleChecks = await page.evaluate(payload => {
       Object.assign(state, payload);
       const defaultChecked = document.getElementById('include-machine-course').checked;

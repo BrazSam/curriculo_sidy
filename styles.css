@@ -156,8 +156,7 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* 5. Stepper: esconde os rótulos de texto em telas muito estreitas,
-      mantendo só os números dos passos (evita quebra/sobreposição) */
+/* Etapas compactas em telas estreitas. */
 @media screen and (max-width: 480px) {
   .stepper-container {
     gap: 4px;
@@ -192,15 +191,6 @@ body {
   .custom-check-pill,
   .btn-sidy {
     min-height: 44px;
-  }
-}
-
-@media print {
-  *,
-  *::before,
-  *::after {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
   }
 }
 
@@ -298,7 +288,6 @@ body {
   position: relative;
 }
 
-
 .stepper-step {
   display: flex;
   align-items: center;
@@ -347,7 +336,7 @@ body {
 }
 .screen-view.active {
   display: block;
-  animation: fadeIn 0.25s ease-out;
+  animation: fadeIn 220ms cubic-bezier(.2, .7, .3, 1);
 }
 @keyframes fadeIn {
   from {
@@ -358,6 +347,10 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen-view.active { animation: none; }
+  .btn-sidy:hover { transform: none; }
 }
 
 /* Botões da aplicação */
@@ -444,7 +437,7 @@ body {
 
 .form-group {
   margin-bottom: 16px;
-  min-width: 0;         /* garante que o item do grid possa encolher */
+  min-width: 0;
   max-width: 100%;
 }
 .form-group label {
@@ -901,11 +894,7 @@ body {
 .character-count.at-limit { color: #854d0e; font-weight: 600; }
 
 /* Campos nativos precisam poder encolher também no Safari do celular. */
-.form-grid-2, .form-grid-3 { min-width: 0; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 640px) {
-  .form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .form-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
+
 input.form-control[type="date"], input.form-control[type="month"] {
   display: block; appearance: none; -webkit-appearance: none;
   width: 100%; min-width: 0; max-width: 100%; min-inline-size: 0;
@@ -946,47 +935,8 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
 .resume-content .res-mach-chip, .resume-content .resume-pill { white-space: normal; overflow-wrap: anywhere; }
 .resume-content .res-mach-icon { flex-shrink: 0; }
 @media screen { #resume-paper { transform: scale(var(--preview-scale, 1)); } }
-@media print {
-  @page { size: A4 portrait; margin: 0; }
-  html, body { width: 210mm; margin: 0 !important; padding: 0 !important; background: white; }
-  body > :not(#screen-share) { display: none !important; }
-  #screen-share > :not(.resume-wrapper) { display: none !important; }
-  #screen-share { display: block !important; width: 210mm !important; max-width: none !important; margin: 0 !important; padding: 0 !important; animation: none !important; }
-  .resume-wrapper { width: 210mm; background: none; padding: 0; margin: 0; border-radius: 0; overflow: visible; }
-  .resume-preview { width: 210mm; height: 296mm; margin: 0; }
-  #resume-paper { position: relative; transform: none !important; box-shadow: none; border: 0; break-inside: avoid; }
-}
 
 #res-additional-chips { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-@media print { .resume-content { break-inside: avoid; } #resume-paper { overflow: hidden; } }
-
-@media print {
- html, body, #screen-share { height: 296mm !important; min-height: 0 !important; overflow: hidden !important; }
-}
-
-/* Impressão nativa: zoom reduz também a caixa de layout no Safari.
-   Transform apenas reduz o desenho e pode deixar uma segunda página vazia. */
-@media print {
-  @page { size: A4 portrait; margin: 8mm; }
-  html, body, #screen-share {
-    display: block !important; width: 194mm !important;
-    height: auto !important; min-height: 0 !important;
-    overflow: visible !important;
-  }
-  .resume-wrapper { width: 194mm; }
-  .resume-preview { width: 194mm; height: 279mm; }
-  #resume-paper {
-    width: 194mm; min-width: 194mm;
-    height: 279mm; min-height: 279mm;
-    position: relative; overflow: hidden;
-  }
-  .resume-content {
-    position: relative; transform: none;
-    zoom: var(--resume-fit, 1);
-    margin: 0 auto;
-    break-inside: auto;
-  }
-}
 
 /* Alturas iguais por linha e marcadores independentes da linha de texto. */
 .resume-content .resume-chips-list { align-items: stretch; }
@@ -999,11 +949,7 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
 .resume-content .resume-section-title::before {
   position: absolute; left: 0; top: 0.45em;
 }
-/* Mantém o respiro no documento, sem reservar margem para o rodapé do navegador. */
-@media print {
-  @page { size: A4 portrait; margin: 0; }
-  html { width: 210mm !important; }
-}
+
 .resume-content .resume-pill { align-items: flex-start; padding: 6px 10px; }
 .resume-content .resume-footer:has(#res-gen-date:empty) { display: none; }
 
@@ -1055,14 +1001,52 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
 .resume-content .resume-desc-text { font-size: calc(.84rem * var(--density-font, 1)); line-height: var(--density-line, 1.45); }
 .resume-content #res-premium-text { font-size: calc(.82rem * var(--density-font, 1)) !important; }
 .resume-content .resume-pill, .resume-content .res-mach-chip { padding-top: var(--density-chip, 6px); padding-bottom: var(--density-chip, 6px); font-size: calc(.8rem * var(--density-font, 1)); line-height: var(--density-line, 1.4); }
-@media print {
-  html, body, #screen-share { width: 210mm !important; height: 296mm !important; overflow: hidden !important; }
-  .resume-wrapper, .resume-preview { width: 210mm; }
-  .resume-preview, #resume-paper { height: 296mm; min-height: 296mm; }
-  #resume-paper { width: 210mm; min-width: 210mm; }
-  .resume-content { width: 100%; zoom: 1; margin: 0; }
-}
+
 .resume-symbol { display: inline-block; width: 14px; height: 14px; flex: 0 0 14px; vertical-align: -2px; }
 #res-additional-chips .resume-pill, .tag-chip:has(.resume-symbol) { gap: 5px; }
 #res-additional-chips .resume-symbol { margin-top: 2px; }
 #res-additional-chips .resume-pill > span { min-width: 0; }
+
+/* Controles acessíveis, mantendo a aparência existente. */
+.brand-link { border: 0; padding: 0; background: transparent; }
+button:focus-visible, .custom-check-pill:focus-within { outline: 3px solid var(--sidy-blue); outline-offset: 3px; }
+.choice-error { color: #dc2626; font-size: .85rem; font-weight: 600; margin: 0 0 16px; }
+.custom-additional { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.custom-additional .custom-check-pill { flex: 1; }
+.custom-additional .btn-edit-sec { align-self: flex-end; min-height: 44px; padding: 8px 12px; }
+/* Entrada breve do novo check, sem alterar o espaço dos outros cartões. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .additional-arriving .custom-check-pill { animation: additional-check-arrive 220ms cubic-bezier(.2, .7, .3, 1) both; }
+}
+@keyframes additional-check-arrive {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* O check acompanha a altura dos vizinhos; Remover ocupa sua própria linha. */
+@supports (grid-template-rows: subgrid) {
+  .custom-additional { display: grid; grid-template-rows: subgrid; grid-row: span 2; row-gap: 10px; }
+  .custom-additional .btn-edit-sec { align-self: start; justify-self: end; }
+}
+.additional-info-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; margin-top: 12px; }
+.additional-info-actions small { color: #475569; font-size: .8rem; }
+
+/* Impressão A4: uma única configuração de tamanho, margens e visibilidade. */
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  html, body, #screen-share {
+    display: block !important; width: 210mm !important; height: 296mm !important;
+    min-height: 0 !important; margin: 0 !important; padding: 0 !important;
+    overflow: hidden !important; background: white;
+  }
+  body > :not(#screen-share), #screen-share > :not(.resume-wrapper) { display: none !important; }
+  #screen-share { max-width: none !important; animation: none !important; }
+  .resume-wrapper { width: 210mm; background: none; padding: 0; margin: 0; border-radius: 0; overflow: visible; }
+  .resume-preview { width: 210mm; height: 296mm; margin: 0; }
+  #resume-paper {
+    width: 210mm; min-width: 210mm; height: 296mm; min-height: 296mm;
+    position: relative; transform: none !important; box-shadow: none; border: 0;
+    overflow: hidden; break-inside: avoid;
+  }
+  .resume-content { position: relative; width: 100%; transform: none; zoom: 1; margin: 0; break-inside: avoid; }
+}

@@ -23,7 +23,7 @@
     <!-- Cabeçalho fixo -->
     <header class="app-header">
       <div class="header-inner">
-        <div class="brand-link" onclick="goToStep(1)" title="Ir para o início">
+        <button type="button" class="brand-link" onclick="goToStep(1)" aria-label="Ir para o início" title="Ir para o início">
           <!-- Logo SIDY -->
           <img
             width="100"
@@ -31,9 +31,9 @@
             viewBox="0 0 160 46"
             fill="none"
             src="/img/Logo SiDY vetorizado cores mais claras PNG.png"
-            aria-label="Logo SIDY Escola de Profissões"
+            alt="SIDY Escola de Profissões"
           />
-        </div>
+        </button>
       </div>
     </header>
 
@@ -76,7 +76,7 @@
           Crie seu currículo profissional
         </h1>
         <p style="font-size: 1.05rem; color: #475569; margin-bottom: 24px; line-height: 1.5">
-          Preencha seus dados gerar o currículo padrão da SIDY Escola de Profissões
+          Preencha seus dados para gerar o currículo padrão da SIDY Escola de Profissões
         </p>
 
         <!-- Ilustração: Retroescavadeira -->
@@ -157,7 +157,7 @@
                 ou escolher da galeria.
               </p>
               <div style="display: flex; gap: 8px; flex-wrap: wrap">
-                <label
+                <button type="button" id="btn-add-photo" onclick="document.getElementById('input-photo').click()"
                   class="btn-sidy btn-sidy-primary"
                   style="padding: 8px 16px; font-size: 0.88rem; cursor: pointer"
                 >
@@ -175,14 +175,14 @@
                     <circle cx="12" cy="13" r="4" />
                   </svg>
                   ADICIONAR FOTO
+                </button>
                   <input
                     type="file"
                     id="input-photo"
-                    accept="image/*"
+                    accept="image/*" aria-label="Escolher foto de perfil" tabindex="-1"
                     style="display: none"
                     onchange="handlePhotoUpload(event)"
                   />
-                </label>
                 <button
                   type="button"
                   id="btn-remove-photo"
@@ -226,14 +226,14 @@
                 class="form-control"
                 placeholder="Ex: Carlos Eduardo de Oliveira"
                 required
-                oninput="validateField(this); updateInitials();"
+                oninput="updateInitials()"
               />
               <span class="invalid-feedback">Por favor, informe seu nome completo.</span>
             </div>
 
             <div class="form-group">
               <label for="f-nasc">Data de Nascimento</label>
-              <input type="text" id="f-nasc" autocomplete="bday" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" class="form-control" oninput="maskBirthDate(this)" onblur="validateField(this)" />
+              <input type="text" id="f-nasc" autocomplete="bday" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" class="form-control" oninput="maskBirthDate(this)" />
             </div>
           </div>
 
@@ -246,7 +246,6 @@
                 class="form-control"
                 placeholder="Ex: Campinas"
                 required
-                oninput="validateField(this)"
               />
               <span class="invalid-feedback">Informe sua cidade.</span>
             </div>
@@ -279,7 +278,7 @@
                 <option value="RO">Rondônia (RO)</option>
                 <option value="RR">Roraima (RR)</option>
                 <option value="SC">Santa Catarina (SC)</option>
-                <option value="SP" selected>São Paulo (SP)</option>
+                <option value="SP">São Paulo (SP)</option>
                 <option value="SE">Sergipe (SE)</option>
                 <option value="TO">Tocantins (TO)</option>
               </select>
@@ -306,7 +305,7 @@
                 class="form-control"
                 placeholder="Ex: (11) 98675-4321"
                 required
-                oninput="maskPhone(this); validateField(this);"
+                oninput="maskPhone(this)"
               />
               <span class="invalid-feedback">Informe um telefone/WhatsApp válido.</span>
             </div>
@@ -319,7 +318,6 @@
                 class="form-control"
                 placeholder="carlos@exemplo.com"
                 required
-                oninput="validateField(this)"
               />
               <span class="invalid-feedback" id="f-email-error">Informe um e-mail válido.</span>
             </div>
@@ -369,11 +367,11 @@
             <span class="course-badge-pill">Carga Horária: 66 Horas</span>
           </label>
 
-          <!-- Mês/Ano de Conclusão: largura total -->
+          <!-- Data de conclusão informada pelo aluno. -->
           <div id="machine-course-fields">
           <div class="form-group">
-            <label for="f-curso-fim">Mês/Ano de Conclusão</label>
-            <input type="month" id="f-curso-fim" class="form-control" />
+            <label for="f-curso-fim" id="curso-fim-label">Mês/Ano de Conclusão *</label>
+            <input type="month" id="f-curso-fim" class="form-control" required />
           </div>
 
           </div>
@@ -493,7 +491,7 @@
               Máquinas Capacitadas
             </h3>
             <button type="button" class="btn-edit-sec" onclick="toggleAllMachines()"
-              >Selecionar todas</button
+              id="btn-toggle-machines">Desmarcar todas</button
             >
           </div>
           <p style="font-size: 0.88rem; color: #64748b; margin-top: -6px"
@@ -571,7 +569,7 @@
               border: 1px solid var(--sidy-border);
             "
           >
-            <label
+            <p id="premium-question"
               style="
                 font-size: 0.95rem;
                 font-weight: 700;
@@ -581,14 +579,13 @@
               "
             >
               Você possui a Certificação Premium SIDY?
-            </label>
-            <div style="display: flex; gap: 16px; margin-bottom: 12px">
-              <label class="custom-check-pill checked" style="flex: 1; justify-content: center">
+            </p>
+            <div role="radiogroup" aria-labelledby="premium-question" style="display: flex; gap: 16px; margin-bottom: 12px">
+              <label class="custom-check-pill" style="flex: 1; justify-content: center">
                 <input
                   type="radio"
                   name="premium_sidy"
                   value="sim"
-                  checked
                   onchange="handlePremiumToggle(true)"
                 />
                 <strong>Sim, possuo</strong>
@@ -607,6 +604,7 @@
             <div
               id="premium-badge-info"
               style="
+                display: none;
                 background: #ecfdf5;
                 border: 1px solid #a7f3d0;
                 border-radius: 8px;
@@ -662,7 +660,7 @@
           </div>
 
           <div style="margin-bottom: 16px">
-            <label
+            <p id="experience-question"
               style="
                 font-size: 0.9rem;
                 font-weight: 600;
@@ -672,14 +670,13 @@
               "
             >
               Você possui experiência profissional comprovada ou anterior?
-            </label>
-            <div style="display: flex; gap: 16px; margin-bottom: 12px">
-              <label class="custom-check-pill checked" style="flex: 1; justify-content: center">
+            </p>
+            <div role="radiogroup" aria-labelledby="experience-question" aria-describedby="experience-choice-error" style="display: flex; gap: 16px; margin-bottom: 12px">
+              <label class="custom-check-pill" style="flex: 1; justify-content: center">
                 <input
                   type="radio"
                   name="has_experience"
                   value="sim"
-                  checked
                   onchange="handleExpToggle(true)"
                 />
                 <strong>Sim, possuo</strong>
@@ -696,7 +693,8 @@
             </div>
           </div>
 
-          <div id="experience-container">
+          <p id="experience-choice-error" class="choice-error" role="alert" hidden>Informe se você possui experiência profissional.</p>
+          <div id="experience-container" style="display: none">
             <!-- Primeira experiência -->
             <div
               class="exp-block"
@@ -724,7 +722,7 @@
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label for="exp-empresa-0">Nome da Empresa</label>
+                  <label for="exp-empresa-0">Nome da Empresa *</label>
                   <input
                     type="text"
                     class="form-control exp-empresa"
@@ -733,7 +731,7 @@
                   <div class="field-guidance"><small id="exp-empresa-0-help">Informe o nome da empresa onde trabalhou.</small><small class="character-count" id="exp-empresa-0-count">0 de 40 caracteres</small></div>
                 </div>
                 <div class="form-group">
-                  <label for="exp-cargo-0">Cargo / Função</label>
+                  <label for="exp-cargo-0">Cargo / Função *</label>
                   <input
                     type="text"
                     class="form-control exp-cargo"
@@ -745,11 +743,11 @@
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label>Data de Início</label>
-                  <input type="month" class="form-control exp-inicio" />
+                  <label for="exp-inicio-0">Data de Início *</label>
+                  <input type="month" id="exp-inicio-0" class="form-control exp-inicio" />
                 </div>
                 <div class="form-group">
-                  <label>Data de Saída</label>
+                  <label for="exp-fim-0">Data de Saída *</label>
                   <input type="month" class="form-control exp-fim" id="exp-fim-0" />
                   <label
                     style="
@@ -769,7 +767,7 @@
               </div>
 
               <div class="form-group" style="margin-bottom: 0">
-                <label for="exp-atividades-0">Principais Atividades / Responsabilidades</label>
+                <label for="exp-atividades-0">Principais Atividades / Responsabilidades *</label>
                 <textarea
                   class="form-control exp-atividades"
                   rows="2"
@@ -813,7 +811,7 @@
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label for="exp-empresa-1">Nome da Empresa</label>
+                  <label for="exp-empresa-1">Nome da Empresa *</label>
                   <input
                     type="text"
                     class="form-control exp-empresa"
@@ -822,7 +820,7 @@
                   <div class="field-guidance"><small id="exp-empresa-1-help">Informe o nome da empresa onde trabalhou.</small><small class="character-count" id="exp-empresa-1-count">0 de 40 caracteres</small></div>
                 </div>
                 <div class="form-group">
-                  <label for="exp-cargo-1">Cargo / Função</label>
+                  <label for="exp-cargo-1">Cargo / Função *</label>
                   <input
                     type="text"
                     class="form-control exp-cargo"
@@ -834,11 +832,11 @@
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label>Data de Início</label>
-                  <input type="month" class="form-control exp-inicio" />
+                  <label for="exp-inicio-1">Data de Início *</label>
+                  <input type="month" id="exp-inicio-1" class="form-control exp-inicio" />
                 </div>
                 <div class="form-group">
-                  <label>Data de Saída</label>
+                  <label for="exp-fim-1">Data de Saída *</label>
                   <input type="month" class="form-control exp-fim" id="exp-fim-1" />
                   <label
                     style="
@@ -858,7 +856,7 @@
               </div>
 
               <div class="form-group" style="margin-bottom: 0">
-                <label for="exp-atividades-1">Principais Atividades / Responsabilidades</label>
+                <label for="exp-atividades-1">Principais Atividades / Responsabilidades *</label>
                 <textarea
                   class="form-control exp-atividades"
                   rows="2"
@@ -907,6 +905,7 @@
           >
 
           <div
+            id="additional-options"
             style="
               display: grid;
               grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
@@ -959,15 +958,19 @@
 
           <div class="form-group" style="margin-bottom: 0">
             <label for="f-outras-info"
-              >Outras Observações / Informações Relevantes (Opcional)</label
+              >Adicionar informação personalizada (opcional)</label
             >
             <textarea
-              id="f-outras-info" maxlength="60" aria-describedby="f-outras-info-help f-outras-info-count"
+              id="f-outras-info" maxlength="50" aria-describedby="f-outras-info-help f-outras-info-count additional-info-status"
               class="form-control"
               rows="2"
               placeholder="Ex: Fácil aprendizado, pontualidade, trabalho em equipe."
             ></textarea>
-            <div class="field-guidance"><small id="f-outras-info-help">Inclua algo relevante para a vaga que ainda não informou.</small><small class="character-count" id="f-outras-info-count">0 de 60 caracteres</small></div>
+            <div class="field-guidance"><small id="f-outras-info-help">Escreva e clique em Adicionar para criar um check acima. Máximo de 2 informações personalizadas.</small><small class="character-count" id="f-outras-info-count">0 de 50 caracteres</small></div>
+            <div class="additional-info-actions">
+              <button type="button" id="btn-add-info" class="btn-sidy btn-sidy-outline" onclick="addAdditionalInfo()">↑ Adicionar informação</button>
+              <small id="additional-info-status" role="status" aria-live="polite">0 de 2 informações adicionadas</small>
+            </div>
           </div>
         </section>
 
@@ -1027,11 +1030,12 @@
             </svg>
             Dados Pessoais
           </div>
-          <button type="button" class="btn-edit-sec" onclick="editSection('sec-pessoais')"
+          <button type="button" class="btn-edit-sec" aria-label="Editar dados pessoais" onclick="editSection('sec-pessoais')"
             ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 3 5 5L8 21H3v-5L16 3Z M13 6l5 5" /></svg> Editar</button
           >
         </div>
         <div style="display: flex; gap: 18px; align-items: center; flex-wrap: wrap">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
           <div
             id="rev-photo-container"
             style="
@@ -1050,6 +1054,8 @@
             "
           >
             ?
+          </div>
+          <button type="button" id="btn-edit-photo" class="btn-edit-sec" onclick="editSection('sec-foto')">Editar foto</button>
           </div>
           <div>
             <div id="rev-nome" style="font-size: 1.25rem; font-weight: 800; color: var(--sidy-navy)"
@@ -1451,7 +1457,7 @@
                 </div>
 
             <!-- Seção Máquinas Operadas -->
-            <div>
+            <div id="res-sec-maquinas">
               <div class="resume-section-title">Máquinas Operadas &amp; Habilitadas</div>
               <div class="resume-chips-list" id="res-machines-list">
                 <!-- Preenchido pelo JavaScript -->

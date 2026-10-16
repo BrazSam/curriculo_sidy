@@ -16,8 +16,14 @@ function validate(input) {
     if (!Array.isArray(value) || value.length > 20) throw new Error('Lista de informações inválida.');
     return value.map(convert);
   };
-  const limits = { nome: 100, nascimento: 10, cidade: 80, uf: 2, bairro: 80, telefone: 16, email: 254, cnh: 10, cursoInicio: 7, cursoFim: 7, outrasInfo: 60 };
+  const limits = { nome: 100, nascimento: 10, cidade: 80, uf: 2, bairro: 80, telefone: 16, email: 254, cnh: 10, cursoInicio: 7, cursoFim: 7, outrasInfo: 50 };
   const data = Object.fromEntries(fields.map(key => [key, text(input[key], limits[key])]));
+  const now = new Date();
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const validMonth = value => /^[1-9]\d{3}-(0[1-9]|1[0-2])$/.test(value);
+  if (input.includeMachineCourse !== false && (!validMonth(data.cursoFim) || data.cursoFim > month)) {
+    throw new Error('Informe uma data de conclusão válida, que não esteja no futuro.');
+  }
   if (data.nascimento) {
     const date = new Date(data.nascimento + 'T12:00:00Z');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(data.nascimento) || Number.isNaN(date.getTime()) ||
@@ -35,11 +41,41 @@ function validate(input) {
   data.includeMachineCourse = input.includeMachineCourse !== false;
   data.hasExperience = input.hasExperience === true;
   data.maquinas = list(input.maquinas, value => text(value, 120));
-  data.adicionais = list(input.adicionais, value => text(value, 250));
+  // As opções fixas não ocupam as duas vagas de informações personalizadas.
+  const normalizeInfo = value => value.trim().replace(/\s+/g, ' ').normalize('NFC');
+  const infoKey = value => normalizeInfo(value).toLocaleLowerCase('pt-BR');
+  const defaultInfo = [
+    'Disponibilidade para estágio prático', 'Início imediato',
+    'Disponibilidade para mudança de cidade', 'Disponibilidade de horário (turnos/escalas)',
+  ];
+  const aliases = new Map(defaultInfo.map(value => [infoKey(value), value]));
+  aliases.set(infoKey('Disponibilidade para mudança'), defaultInfo[2]);
+  aliases.set(infoKey('Disponibilidade total de horário'), defaultInfo[3]);
+  const seenInfo = new Set();
+  let customInfoCount = 0;
+  const validateInfo = value => {
+    const normalized = normalizeInfo(text(value, 50));
+    if (!normalized) throw new Error('Escreva uma informação adicional válida.');
+    const canonical = aliases.get(infoKey(normalized));
+    const key = infoKey(canonical || normalized);
+    if (seenInfo.has(key)) throw new Error('Há informações adicionais repetidas.');
+    seenInfo.add(key);
+    if (!canonical && ++customInfoCount > 2) throw new Error('Adicione no máximo 2 informações personalizadas.');
+    return canonical || normalized;
+  };
+  data.adicionais = list(input.adicionais, validateInfo);
+  // Compatibilidade com currículos enviados antes da criação dos checks personalizados.
+  data.outrasInfo = normalizeInfo(data.outrasInfo);
+  if (data.outrasInfo) data.outrasInfo = validateInfo(data.outrasInfo);
   data.experiencias = list(input.experiencias, item => {
     if (!item || typeof item !== 'object') throw new Error('Experiência inválida.');
     const limits = { empresa: 40, cargo: 30, inicio: 7, fim: 7, atividades: 80 };
-    return { ...Object.fromEntries(Object.keys(limits).map(key => [key, text(item[key], limits[key])])), atual: item.atual === true };
+    const experience = { ...Object.fromEntries(Object.keys(limits).map(key => [key, text(item[key], limits[key])])), atual: item.atual === true };
+    if (!validMonth(experience.inicio) || experience.inicio > month ||
+        (!experience.atual && (!validMonth(experience.fim) || experience.fim > month || experience.fim < experience.inicio))) {
+      throw new Error('Revise as datas da experiência: não podem estar no futuro nem ter saída anterior ao início.');
+    }
+    return experience;
   });
   data.outrasFormacoes = list(input.outrasFormacoes, item => {
     if (!item || typeof item !== 'object') throw new Error('Formação inválida.');
