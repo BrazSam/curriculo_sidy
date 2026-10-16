@@ -987,6 +987,9 @@ async function prepareResumePDF() {
   resumeRequest = controller;
   const timeout = setTimeout(() => controller.abort(), 65000);
   resumeFile = null;
+  const downloadFields = document.getElementById('resume-download-form').elements;
+  downloadFields.namedItem('pdf').value = '';
+  downloadFields.namedItem('filename').value = '';
   if (resumeUrl) URL.revokeObjectURL(resumeUrl);
   resumeUrl = null;
   clearShareFallback();
@@ -1033,8 +1036,18 @@ async function prepareResumePDF() {
       if (error.name === 'AbortError') throw error;
       throw new Error('O recebimento do PDF foi interrompido. Verifique sua internet e tente novamente.');
     });
+    // Prepara o formulário antes do clique para manter o download ligado ao gesto do usuário.
+    const downloadData = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = () => reject(new Error('Não foi possível preparar o download. Tente novamente.'));
+      reader.readAsDataURL(blob);
+    });
     if (version !== resumeVersion) return;
     const filename = 'Curriculo_SIDY_' + (payload.nome.replace(/[^\p{L}\p{N}_-]+/gu, '_') || 'Aluno') + '.pdf';
+    const downloadForm = document.getElementById('resume-download-form');
+    downloadForm.elements.namedItem('pdf').value = downloadData;
+    downloadForm.elements.namedItem('filename').value = filename;
     resumeFile = new File([blob], filename, { type: 'application/pdf' });
     resumeUrl = URL.createObjectURL(resumeFile);
     open.href = resumeUrl;
@@ -1066,7 +1079,6 @@ async function prepareResumePDF() {
 async function downloadResumePDF() {
   if (!resumeFile || !resumeUrl) return;
   const file = resumeFile;
-  const url = resumeUrl;
   const status = document.getElementById('pdf-status');
   if (window.showSaveFilePicker) {
     try {
@@ -1084,16 +1096,31 @@ async function downloadResumePDF() {
       // Se o navegador bloquear a escolha de pasta, usa o download convencional.
     }
   }
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = file.name;
-  link.target = '_blank';
-  link.rel = 'noopener';
-  document.body.append(link);
-  link.click();
-  link.remove();
-  if (file === resumeFile) status.textContent = 'Salvamento solicitado. Se o PDF abrir em outra tela, use o menu do navegador para salvar.';
+  if (file !== resumeFile) return;
+  const form = document.getElementById('resume-download-form');
+  if (!form.elements.namedItem('pdf').value) {
+    status.textContent = 'Gere o currículo novamente para preparar o download.';
+    return;
+  }
+  document.getElementById('resume-download-frame').dataset.version = String(resumeVersion);
+  form.submit();
+  if (file === resumeFile) status.textContent = 'Download solicitado. Confirme “Baixar” se o navegador pedir.';
 }
+
+document.getElementById('resume-download-frame').addEventListener('load', event => {
+  const frame = event.currentTarget;
+  if (frame.dataset.version !== String(resumeVersion)) return;
+  try {
+    const text = frame.contentDocument?.body?.textContent?.trim();
+    if (!text) return;
+    let message;
+    try { message = JSON.parse(text).error; } catch { /* Resposta inesperada do servidor. */ }
+    document.getElementById('pdf-status').textContent = typeof message === 'string'
+      ? message : 'Não foi possível baixar o PDF. Verifique sua conexão e tente novamente.';
+  } catch {
+    document.getElementById('pdf-status').textContent = 'Não foi possível baixar o PDF. Tente novamente.';
+  }
+});
 
 function showShareFallback() {
   if (!resumeFile) return;

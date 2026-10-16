@@ -256,8 +256,12 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
     assert.deepEqual(toggleChecks, { defaultChecked: true, hidden: true, restored: true, svgCount: 4, emoji: false });
     let requests = 0;
     let failRequest = false;
+    let failDownload = false;
     await page.setRequestInterception(true);
     page.on('request', request => {
+      if (request.url().endsWith('/api/download') && failDownload) {
+        return request.respond({ status: 400, contentType: 'application/json', body: JSON.stringify({ error: 'Falha no download de teste.' }) });
+      }
       if (request.url().endsWith('/api/resume')) {
         requests++;
         return request.respond(failRequest ? { status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Falha de teste. Tente novamente.' }) } : { status: 200, contentType: 'application/pdf', body: pdf });
@@ -286,6 +290,16 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
       await page.screenshot({ path: `tmp/pdfs/preview-${width}.png`, fullPage: true });
     }
     const beforeShare = requests;
+    const downloadResponse = await fetch(`http://127.0.0.1:${server.address().port}/api/download`, {
+      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ pdf: pdf.toString('base64'), filename: 'Curriculo_Teste.pdf' }),
+    });
+    assert.equal(downloadResponse.status, 200);
+    assert.match(downloadResponse.headers.get('content-disposition'), /^attachment;/);
+    assert.equal(downloadResponse.headers.get('content-type'), 'application/octet-stream');
+    assert.deepEqual(Buffer.from(await downloadResponse.arrayBuffer()), pdf);
+    const originalUrl = page.url();
+    const originalPages = (await browser.pages()).length;
     const downloadSession = await page.createCDPSession();
     const downloadDir = require('node:path').resolve('tmp/pdfs/downloads');
     await fs.mkdir(downloadDir, { recursive: true });
@@ -298,6 +312,8 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
     await downloaded;
     const filename = await page.evaluate(() => resumeFile.name);
     assert.deepEqual(await fs.readFile(require('node:path').join(downloadDir, filename)), pdf);
+    assert.equal(page.url(), originalUrl);
+    assert.equal((await browser.pages()).length, originalPages);
     assert.equal(requests, beforeShare);
     const savedSameFile = await page.evaluate(async () => {
       let saved;
@@ -309,6 +325,12 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
       return saved === resumeFile;
     });
     assert.equal(savedSameFile, true);
+    failDownload = true;
+    await page.click('#btn-download-pdf');
+    await page.waitForFunction(() => document.getElementById('pdf-status').textContent === 'Falha no download de teste.');
+    assert.equal(page.url(), originalUrl);
+    assert.equal(await page.evaluate(() => Boolean(resumeFile)), true);
+    failDownload = false;
     await page.evaluate(() => {
       Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true });
       Object.defineProperty(navigator, 'share', { configurable: true, value: async ({ files }) => { window.sharedSameFile = files[0] === resumeFile; } });
@@ -330,6 +352,8 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
     assert.equal(await page.$eval('#btn-download-pdf', el => el.disabled), true);
     assert.equal(await page.$eval('#btn-share-whatsapp', el => el.disabled), true);
     assert.equal(await page.evaluate(() => resumeFile), null);
+    assert.equal(await page.evaluate(() => document.getElementById('resume-download-form').elements.namedItem('pdf').value), '');
+    assert.equal(await page.evaluate(() => document.getElementById('resume-download-form').elements.namedItem('filename').value), '');
     await page.evaluate(() => Object.defineProperty(navigator, 'onLine', { configurable: true, value: false }));
     await page.evaluate(() => prepareResumePDF());
     assert.match(await page.$eval('#pdf-status', el => el.textContent), /Você está sem conexão/);

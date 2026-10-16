@@ -1347,7 +1347,7 @@
             Enviar no WhatsApp
           </button>
         </div>
-        <p class="pdf-save-help">Se o PDF abrir em outra tela, use o menu do navegador para salvar.</p>
+        <p class="pdf-save-help">Confirme o download se o navegador solicitar.</p>
       </div>
 
       <!-- Se o celular não compartilhar o arquivo, mostramos como baixar e anexar. -->
@@ -1357,7 +1357,7 @@
           WhatsApp.</p
         >
         <div style="display: flex; gap: 12px; flex-wrap: wrap">
-          <a id="share-download" class="btn-sidy btn-sidy-primary">Salvar PDF</a>
+          <a id="share-download" class="btn-sidy btn-sidy-primary" onclick="event.preventDefault(); downloadResumePDF()">Salvar PDF</a>
           <a
             id="share-whatsapp-link"
             class="btn-sidy btn-sidy-green"
@@ -1382,7 +1382,12 @@
       </div>
       <div id="pdf-preview" class="pdf-preview" aria-label="Prévia do arquivo PDF" hidden></div>
       <a id="pdf-open" class="pdf-print-link no-print" target="_blank" rel="noopener" hidden>Abrir PDF para imprimir</a>
-      <p class="pdf-privacy">Seus dados e sua foto são enviados ao servidor apenas para gerar o PDF, sem salvar o currículo.</p>
+      <p class="pdf-privacy">O servidor prepara e entrega seu PDF sem armazenar o currículo.</p>
+      <iframe id="resume-download-frame" name="resume-download-frame" title="Download do currículo" hidden></iframe>
+      <form id="resume-download-form" action="/api/download" method="post" target="resume-download-frame" hidden>
+        <input type="hidden" name="pdf" />
+        <input type="hidden" name="filename" />
+      </form>
       <!-- Modelo A4 usado pelo servidor. A prévia visível fica em #pdf-preview. -->
       <div class="resume-wrapper">
         <div class="resume-preview">

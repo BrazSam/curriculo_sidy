@@ -56,6 +56,7 @@ Depois da publicação, valide a geração na URL de preview da Vercel e o envio
 - URLs externas são bloqueadas durante a renderização. O serviço não salva o currículo nem registra os dados preenchidos; a resposta usa `Cache-Control: no-store`.
 - A tela 4 mostra o PDF com PDF.js. Somente o tamanho da visualização muda conforme a tela.
 - Download, visualização e compartilhamento reutilizam o mesmo `File`, sem gerar outra versão no clique.
+- Para baixar, um formulário envia o PDF já pronto a `/api/download`, que devolve os mesmos bytes como anexo (`Content-Disposition: attachment`), sem armazenamento. Isso evita depender de downloads de URLs `blob:` no Safari; o navegador pode solicitar confirmação.
 - O botão WhatsApp abre o compartilhamento do sistema; o usuário escolhe o aplicativo e o contato. Sem suporte, oferece download e envio manual.
 - Conteúdo que exigiria redução abaixo de 65% é recusado com orientação para resumir, evitando cortes silenciosos ou letras excessivamente pequenas.
 

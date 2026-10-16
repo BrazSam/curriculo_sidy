@@ -2,6 +2,7 @@ const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const handler = require('../api/resume');
+const downloadHandler = require('../api/download');
 const root = path.resolve(__dirname, '../dist');
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.wasm': 'application/wasm' };
 const server = http.createServer(async (req, res) => {
@@ -10,14 +11,15 @@ const server = http.createServer(async (req, res) => {
   res.send = body => res.end(body);
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-    if (pathname === '/api/resume') {
+    if (pathname === '/api/resume' || pathname === '/api/download') {
+      const limit = pathname === '/api/download' ? downloadHandler.MAX_BODY_BYTES : 2000000;
       let body = '';
       for await (const chunk of req) {
         body += chunk;
-        if (Buffer.byteLength(body) > 2000000) return res.status(413).json({ error: 'Arquivo muito grande.' });
+        if (Buffer.byteLength(body) > limit) return res.status(413).json({ error: 'Arquivo muito grande.' });
       }
       req.body = body;
-      return await handler(req, res);
+      return await (pathname === '/api/download' ? downloadHandler : handler)(req, res);
     }
     const filename = path.resolve(root, '.' + (pathname === '/' ? '/index.html' : pathname));
     if (!filename.startsWith(root + path.sep)) return res.status(403).send('Forbidden');
