@@ -26,5 +26,20 @@ const server = http.createServer(async (req, res) => {
     res.end(data);
   } catch { res.status(404).send('Not found'); }
 });
-if (require.main === module) server.listen(3000, '127.0.0.1', () => console.log('Currículo SIDY: http://localhost:3000'));
+if (require.main === module) {
+  const requestedPort = Number(process.env.PORT) || 3000;
+  server.once('listening', () => console.log(`Currículo SIDY: http://localhost:${server.address().port}`));
+  const listen = port => {
+    server.once('error', error => {
+      if (!process.env.PORT && error.code === 'EADDRINUSE' && port < 3010) {
+        console.log(`Porta ${port} ocupada; tentando ${port + 1}...`);
+        return listen(port + 1);
+      }
+      console.error(`Não foi possível iniciar o servidor na porta ${port}: ${error.message}`);
+      process.exitCode = 1;
+    });
+    server.listen(port, '127.0.0.1');
+  };
+  listen(requestedPort);
+}
 module.exports = server;

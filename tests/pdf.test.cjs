@@ -26,15 +26,59 @@ test('rejects remote photos, oversized fields and malformed lists', () => {
 
 test('real PDF and responsive client share exactly the prepared file', { timeout: 120000 }, async () => {
   const server = require('../scripts/dev.cjs');
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const { default: puppeteer } = await import('puppeteer-core');
-  const browser = await puppeteer.launch({ executablePath: process.env.CHROME_EXECUTABLE_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-  await fs.mkdir('tmp/pdfs', { recursive: true });
+  let browser;
   try {
+    await new Promise((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', () => { server.removeListener('error', reject); resolve(); });
+    });
+    const { default: puppeteer } = await import('puppeteer-core');
+    browser = await puppeteer.launch({ executablePath: process.env.CHROME_EXECUTABLE_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
+    await fs.mkdir('tmp/pdfs', { recursive: true });
     const page = await browser.newPage();
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}`, { waitUntil: 'domcontentloaded' });
+    const photoChecks = await page.evaluate(async () => {
+      const input = document.getElementById('input-photo');
+      const alerts = [];
+      const originalAlert = window.alert;
+      const upload = file => {
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        input.files = transfer.files;
+        return handlePhotoUpload({ target: input });
+      };
+      window.alert = message => alerts.push(message);
+      try {
+        const invalid = new File(['not an image'], 'foto.png', { type: 'image/png' });
+        await upload(invalid);
+        const rejected = state.photoDataUrl === null && input.value === '';
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 20;
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const valid = new File([blob], 'valida.png', { type: 'image/png' });
+        const reading = upload(valid);
+        validateAndGoToReview();
+        await reading;
+        const accepted = state.photoDataUrl?.startsWith('data:image/png;base64,');
+        const previous = state.photoDataUrl;
+        await upload(invalid);
+        const preserved = state.photoDataUrl === previous;
+        const stale = upload(valid);
+        removePhoto();
+        await stale;
+        return { rejected, accepted, preserved, removed: state.photoDataUrl === null, alerts };
+      } finally { window.alert = originalAlert; }
+    });
+    assert.equal(photoChecks.rejected, true);
+    assert.equal(photoChecks.accepted, true);
+    assert.equal(photoChecks.preserved, true);
+    assert.equal(photoChecks.removed, true);
+    assert.equal(photoChecks.alerts.length, 3);
+    assert.match(photoChecks.alerts[0], /Não foi possível abrir esta foto/);
+    assert.match(photoChecks.alerts[1], /Aguarde a leitura da foto/);
+    assert.match(photoChecks.alerts[2], /Não foi possível abrir esta foto/);
     const formations = await page.evaluate(() => {
       const visible = () => document.querySelectorAll('.formacao-block:not([hidden])').length;
       const initial = visible();
@@ -311,5 +355,8 @@ test('real PDF and responsive client share exactly the prepared file', { timeout
     await assert.rejects(renderPDF({ ...example,
       experiencias: Array.from({ length: 20 }, () => ({ empresa: 'Empresa', cargo: 'Operador', atividades: 'Atividade detalhada. '.repeat(25) })),
     }), /RESUME_TOO_LONG/);
-  } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+  } finally {
+    try { await browser?.close(); }
+    finally { if (server.listening) await new Promise(resolve => server.close(resolve)); }
+  }
 });

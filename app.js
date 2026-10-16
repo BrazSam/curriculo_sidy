@@ -95,19 +95,43 @@ function goToStep(stepNum) {
 }
 
 // 4. FOTO — leitura do arquivo, prévia e iniciais
-function handlePhotoUpload(e) {
-  const file = e.target.files[0];
+let photoUploadVersion = 0;
+let photoUploadPending = false;
+
+async function handlePhotoUpload(e) {
+  const input = e.target;
+  const file = input.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = function (evt) {
-    state.photoDataUrl = evt.target.result;
+  const version = ++photoUploadVersion;
+  photoUploadPending = true;
+  try {
+    const source = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.onabort = () => reject(new Error('Leitura cancelada.'));
+      reader.readAsDataURL(file);
+    });
+    const image = new Image();
+    image.src = source;
+    await image.decode();
+    if (!image.naturalWidth || !image.naturalHeight) throw new Error('Imagem vazia.');
+    if (version !== photoUploadVersion) return;
+    state.photoDataUrl = source;
     updatePhotoPreview();
-  };
-  reader.readAsDataURL(file);
+  } catch {
+    if (version !== photoUploadVersion) return;
+    input.value = '';
+    alert('Não foi possível abrir esta foto. Escolha outra imagem, de preferência em JPG, PNG ou WebP.');
+  } finally {
+    if (version === photoUploadVersion) photoUploadPending = false;
+  }
 }
 
 function removePhoto() {
+  photoUploadVersion++;
+  photoUploadPending = false;
   state.photoDataUrl = null;
   document.getElementById('input-photo').value = '';
   updatePhotoPreview();
@@ -423,6 +447,10 @@ document.querySelectorAll('.exp-block').forEach((block) => {
 
 // 8. REVISÃO — valida o formulário e copia os valores para state
 function validateAndGoToReview() {
+  if (photoUploadPending) {
+    alert('Aguarde a leitura da foto antes de continuar.');
+    return;
+  }
   if (!state.photoDataUrl) {
     alert('Por favor, adicione uma foto de perfil.');
     goToStep(2);
