@@ -1058,3 +1058,7 @@ input[type="month"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
   #resume-paper { width: 210mm; min-width: 210mm; }
   .resume-content { width: 100%; zoom: 1; margin: 0; }
 }
+.resume-symbol { display: inline-block; width: 14px; height: 14px; flex: 0 0 14px; vertical-align: -2px; }
+#res-additional-chips .resume-pill, .tag-chip:has(.resume-symbol) { gap: 5px; }
+#res-additional-chips .resume-symbol { margin-top: 2px; }
+#res-additional-chips .resume-pill > span { min-width: 0; }

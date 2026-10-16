@@ -587,6 +587,26 @@ function textElement(tag, text, className = '', styles = '') {
   return element;
 }
 
+function resumeSymbol(kind = 'check') {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  Object.entries({ width: '14', height: '14', viewBox: '0 0 24 24', fill: 'none',
+    stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round',
+    'stroke-linejoin': 'round', 'aria-hidden': 'true', class: 'resume-symbol' })
+    .forEach(([key, value]) => svg.setAttribute(key, value));
+  const path = document.createElementNS(svg.namespaceURI, 'path');
+  path.setAttribute('d', kind === 'star'
+    ? 'm12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z'
+    : 'm5 12 4 4L19 6');
+  svg.append(path);
+  return svg;
+}
+
+function checkedChip(text, className) {
+  const chip = textElement('span', '', className);
+  chip.append(resumeSymbol(), textElement('span', text));
+  return chip;
+}
+
 function renderContacts(id, includeBirth = false) {
   const paths = {
     location: 'M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z M15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
@@ -757,9 +777,9 @@ function renderReview() {
     revForm.style.display = 'none';
   }
 
-  state.adicionais.forEach((a) => chips.push(textElement('span', '✓ ' + a, 'tag-chip')));
+  state.adicionais.forEach((a) => chips.push(checkedChip(a, 'tag-chip')));
   if (state.outrasInfo)
-    chips.push(textElement('span', '✓ ' + state.outrasInfo, 'tag-chip', 'max-width:100%;'));
+    chips.push(checkedChip(state.outrasInfo, 'tag-chip'));
 
   if (chips.length > 0) {
     const list = textElement('div', '', '', 'display:flex; flex-wrap:wrap; gap:6px;');
@@ -849,7 +869,8 @@ function generateResumeAndShow() {
       `;
     premText.style.display = 'block';
     premText.innerHTML =
-      '★ <strong>Certificação Premium SIDY:</strong> Qualificação técnica abrangente em conformidade com as Normas Regulamentadoras vigentes do Ministério do Trabalho e Emprego (MTE).';
+      '<strong>Certificação Premium SIDY:</strong> Qualificação técnica abrangente em conformidade com as Normas Regulamentadoras vigentes do Ministério do Trabalho e Emprego (MTE).';
+    premText.prepend(resumeSymbol('star'), ' ');
   } else {
     nrsSec.style.display = 'none';
   }
@@ -888,7 +909,7 @@ function generateResumeAndShow() {
   // Reconstrói a lista inteira a cada geração, inclusive quando ela fica vazia.
   const additional = [...state.adicionais];
   if (state.outrasInfo) additional.push(state.outrasInfo);
-  adChips.replaceChildren(...additional.map((a) => textElement('span', '✓ ' + a, 'resume-pill')));
+  adChips.replaceChildren(...additional.map((a) => checkedChip(a, 'resume-pill')));
   adChips.style.display = additional.length ? 'grid' : 'none';
   adSec.style.display = additional.length ? 'block' : 'none';
   exNotes.textContent = '';
